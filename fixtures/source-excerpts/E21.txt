@@ -1,0 +1,102 @@
+# Source excerpt E21 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/consensus/LedgerTrie.h, lines 685-778.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: ad4bd848f137566143a3929d6fa26ff56d2754480da4a1f12c5e22b8ef4bd4de
+# Source file git blob SHA: 17f9e570b0e80d13414bd0a0369e38124d432b0e
+# Source file size: 27368 bytes
+
+# --- src/xrpld/consensus/LedgerTrie.h lines 685-778 ---
+    getPreferred(Seq const largestIssued) const
+    {
+        if (empty())
+            return std::nullopt;
+
+        Node* curr = root.get();
+
+        bool done = false;
+
+        std::uint32_t uncommitted = 0;
+        auto uncommittedIt = seqSupport.begin();
+
+        while (curr && !done)
+        {
+            // Within a single span, the preferred by branch strategy is simply
+            // to continue along the span as long as the branch support of
+            // the next ledger exceeds the uncommitted support for that ledger.
+            {
+                // Add any initial uncommitted support prior for ledgers
+                // earlier than nextSeq or earlier than largestIssued
+                Seq nextSeq = curr->span.start() + Seq{1};
+                while (uncommittedIt != seqSupport.end() &&
+                       uncommittedIt->first < std::max(nextSeq, largestIssued))
+                {
+                    uncommitted += uncommittedIt->second;
+                    uncommittedIt++;
+                }
+
+                // Advance nextSeq along the span
+                while (nextSeq < curr->span.end() &&
+                       curr->branchSupport > uncommitted)
+                {
+                    // Jump to the next seqSupport change
+                    if (uncommittedIt != seqSupport.end() &&
+                        uncommittedIt->first < curr->span.end())
+                    {
+                        nextSeq = uncommittedIt->first + Seq{1};
+                        uncommitted += uncommittedIt->second;
+                        uncommittedIt++;
+                    }
+                    else  // otherwise we jump to the end of the span
+                        nextSeq = curr->span.end();
+                }
+                // We did not consume the entire span, so we have found the
+                // preferred ledger
+                if (nextSeq < curr->span.end())
+                    return curr->span.before(nextSeq)->tip();
+            }
+
+            // We have reached the end of the current span, so we need to
+            // find the best child
+            Node* best = nullptr;
+            std::uint32_t margin = 0;
+            if (curr->children.size() == 1)
+            {
+                best = curr->children[0].get();
+                margin = best->branchSupport;
+            }
+            else if (!curr->children.empty())
+            {
+                // Sort placing children with largest branch support in the
+                // front, breaking ties with the span's starting ID
+                std::partial_sort(
+                    curr->children.begin(),
+                    curr->children.begin() + 2,
+                    curr->children.end(),
+                    [](std::unique_ptr<Node> const& a,
+                       std::unique_ptr<Node> const& b) {
+                        return std::make_tuple(
+                                   a->branchSupport, a->span.startID()) >
+                            std::make_tuple(
+                                   b->branchSupport, b->span.startID());
+                    });
+
+                best = curr->children[0].get();
+                margin = curr->children[0]->branchSupport -
+                    curr->children[1]->branchSupport;
+
+                // If best holds the tie-breaker, gets one larger margin
+                // since the second best needs additional branchSupport
+                // to overcome the tie
+                if (best->span.startID() > curr->children[1]->span.startID())
+                    margin++;
+            }
+
+            // If the best child has margin exceeding the uncommitted support,
+            // continue from that child, otherwise we are done
+            if (best && ((margin > uncommitted) || (uncommitted == 0)))
+                curr = best;
+            else  // current is the best
+                done = true;
+        }
+        return curr->span.tip();
+    }

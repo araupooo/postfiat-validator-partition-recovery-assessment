@@ -1,0 +1,61 @@
+# Source excerpt E11 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/consensus/Consensus.h, lines 1063-1115.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: c600a12673215a68513542bac16b89dccabff37f3652d79b8159860b00898dd8
+# Source file git blob SHA: 9ccc080857e2be382365dff5f349544b9907d9cf
+# Source file size: 65913 bytes
+
+# --- src/xrpld/consensus/Consensus.h lines 1063-1115 ---
+Consensus<Adaptor>::handleWrongLedger(
+    typename Ledger_t::ID const& lgrId,
+    std::unique_ptr<std::stringstream> const& clog)
+{
+    CLOG(clog) << "handleWrongLedger. ";
+    XRPL_ASSERT(
+        lgrId != prevLedgerID_ || previousLedger_.id() != lgrId,
+        "ripple::Consensus::handleWrongLedger : have wrong ledger");
+
+    // Stop proposing because we are out of sync
+    leaveConsensus(clog);
+
+    // First time switching to this ledger
+    if (prevLedgerID_ != lgrId)
+    {
+        prevLedgerID_ = lgrId;
+
+        // Clear out state
+        if (result_)
+        {
+            result_->disputes.clear();
+            result_->compares.clear();
+        }
+
+        currPeerPositions_.clear();
+        rawCloseTimes_.peers.clear();
+        deadNodes_.clear();
+
+        // Get back in sync, this will also recreate disputes
+        playbackProposals();
+    }
+
+    if (previousLedger_.id() == prevLedgerID_)
+    {
+        CLOG(clog) << "previousLedger_.id() == prevLeverID_ " << prevLedgerID_
+                   << ". ";
+        return;
+    }
+
+    // we need to switch the ledger we're working from
+    if (auto newLedger = adaptor_.acquireLedger(prevLedgerID_))
+    {
+        JLOG(j_.info()) << "Have the consensus ledger " << prevLedgerID_;
+        CLOG(clog) << "Have the consensus ledger " << prevLedgerID_ << ". ";
+        startRoundInternal(
+            now_, lgrId, *newLedger, ConsensusMode::switchedLedger, clog);
+    }
+    else
+    {
+        CLOG(clog) << "Still on wrong ledger. ";
+        mode_.set(ConsensusMode::wrongLedger, adaptor_);
+    }
+}

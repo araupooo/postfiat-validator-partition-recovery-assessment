@@ -1,0 +1,38 @@
+# Source excerpt E12 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/consensus/Consensus.h, lines 1119-1148.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: c600a12673215a68513542bac16b89dccabff37f3652d79b8159860b00898dd8
+# Source file git blob SHA: 9ccc080857e2be382365dff5f349544b9907d9cf
+# Source file size: 65913 bytes
+
+# --- src/xrpld/consensus/Consensus.h lines 1119-1148 ---
+Consensus<Adaptor>::checkLedger(std::unique_ptr<std::stringstream> const& clog)
+{
+    CLOG(clog) << "checkLedger. ";
+
+    auto netLgr =
+        adaptor_.getPrevLedger(prevLedgerID_, previousLedger_, mode_.get());
+    CLOG(clog) << "network ledgerid " << netLgr << ",  "
+               << "previous ledger " << prevLedgerID_ << ". ";
+
+    if (netLgr != prevLedgerID_)
+    {
+        std::stringstream ss;
+        ss << "View of consensus changed during " << to_string(phase_)
+           << " mode=" << to_string(mode_.get()) << ", " << prevLedgerID_
+           << " to " << netLgr << ", "
+           << Json::Compact{previousLedger_.getJson()} << ". ";
+        JLOG(j_.warn()) << ss.str();
+        CLOG(clog) << ss.str();
+        CLOG(clog) << "State on consensus change "
+                   << Json::Compact{getJson(true)} << ". ";
+        handleWrongLedger(netLgr, clog);
+    }
+    else if (previousLedger_.id() != prevLedgerID_)
+    {
+        CLOG(clog) << "previousLedger_.id() != prevLedgerID_: "
+                   << previousLedger_.id() << ',' << to_string(prevLedgerID_)
+                   << ". ";
+        handleWrongLedger(netLgr, clog);
+    }
+}

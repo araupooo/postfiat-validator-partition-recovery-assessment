@@ -1,0 +1,58 @@
+# Source excerpt E19 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/consensus/Validations.h, lines 850-899.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: e08b8fca2955b9c45c4673b4e873712c8d7ded405e3952ee011adea53c3d19da
+# Source file git blob SHA: c333aeaefd7890bf1c7d19e56eadbae0b788602e
+# Source file size: 39557 bytes
+
+# --- src/xrpld/consensus/Validations.h lines 850-899 ---
+    getPreferred(Ledger const& curr)
+    {
+        std::lock_guard lock{mutex_};
+        std::optional<SpanTip<Ledger>> preferred =
+            withTrie(lock, [this](LedgerTrie<Ledger>& trie) {
+                return trie.getPreferred(localSeqEnforcer_.largest());
+            });
+        // No trusted validations to determine branch
+        if (!preferred)
+        {
+            // fall back to majority over acquiring ledgers
+            auto it = std::max_element(
+                acquiring_.begin(),
+                acquiring_.end(),
+                [](auto const& a, auto const& b) {
+                    std::pair<Seq, ID> const& aKey = a.first;
+                    typename hash_set<NodeID>::size_type const& aSize =
+                        a.second.size();
+                    std::pair<Seq, ID> const& bKey = b.first;
+                    typename hash_set<NodeID>::size_type const& bSize =
+                        b.second.size();
+                    // order by number of trusted peers validating that ledger
+                    // break ties with ledger ID
+                    return std::tie(aSize, aKey.second) <
+                        std::tie(bSize, bKey.second);
+                });
+            if (it != acquiring_.end())
+                return it->first;
+            return std::nullopt;
+        }
+
+        // If we are the parent of the preferred ledger, stick with our
+        // current ledger since we might be about to generate it
+        if (preferred->seq == curr.seq() + Seq{1} &&
+            preferred->ancestor(curr.seq()) == curr.id())
+            return std::make_pair(curr.seq(), curr.id());
+
+        // A ledger ahead of us is preferred regardless of whether it is
+        // a descendant of our working ledger or it is on a different chain
+        if (preferred->seq > curr.seq())
+            return std::make_pair(preferred->seq, preferred->id);
+
+        // Only switch to earlier or same sequence number
+        // if it is a different chain.
+        if (curr[preferred->seq] != preferred->id)
+            return std::make_pair(preferred->seq, preferred->id);
+
+        // Stick with current ledger
+        return std::make_pair(curr.seq(), curr.id());
+    }

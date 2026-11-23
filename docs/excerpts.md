@@ -4,8 +4,8 @@ Short verbatim excerpts from the pinned source. Pinned source for
 every excerpt: postfiatd commit
 `0085a1ff885d6a446369cf73a4430f75af22be55` (2026-10-10, PR #50 merge).
 Line numbers were verified with `grep -n` on a local checkout of that
-commit. The full ranges live in `fixtures/source-excerpts/` (35 files,
-E01–E35); digests and git blob SHAs are in
+commit. The full ranges live in `fixtures/source-excerpts/` (36 files,
+E01–E36); digests and git blob SHAs are in
 `fixtures/source-hashes.json`. Only short quotes are reproduced here;
 the fixture files are authoritative.
 

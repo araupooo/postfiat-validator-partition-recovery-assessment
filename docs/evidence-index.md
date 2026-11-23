@@ -43,8 +43,8 @@ ledger objects, full SHA-256 in `outputs/sim-run.log`),
 
 ## Fixtures
 
-`fixtures/source-excerpts/` holds 35 verbatim pinned-source excerpts
-(E01–E35, see `docs/citations.md` for the list).
+`fixtures/source-excerpts/` holds 36 verbatim pinned-source excerpts
+(E01–E36, see `docs/citations.md` for the list).
 `fixtures/source-hashes.json` holds SHA-256 digests and git blob SHAs
 for every cited source file (16 files). `fixtures/excerpts-manifest.json`
 is the excerpt list the extractor runs from.

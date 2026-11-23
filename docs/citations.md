@@ -3,7 +3,7 @@
 Pinned source for all code citations: postfiatd commit
 `0085a1ff885d6a446369cf73a4430f75af22be55` (2026-10-10, PR #50 merge).
 Line numbers were verified with `grep -n` on a local checkout of that
-commit. Excerpt files live in `fixtures/source-excerpts/` (E01–E35);
+commit. Excerpt files live in `fixtures/source-excerpts/` (E01–E36);
 digests and blob SHAs are in `fixtures/source-hashes.json`.
 
 ## Pinned-source excerpts

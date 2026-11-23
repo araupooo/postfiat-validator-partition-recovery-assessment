@@ -1,0 +1,35 @@
+# Source excerpt E03 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/consensus/ConsensusParms.h, lines 175-201.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 95f6ea2da07862ff830ab2eaab0f3b384fb89b29260a6b717b2f6c2b7380cca7
+# Source file git blob SHA: d565bd9a5228de171cc777a0a098592f9e8505df
+# Source file size: 8302 bytes
+
+# --- src/xrpld/consensus/ConsensusParms.h lines 175-201 ---
+    ConsensusParms::AvalancheState currentState,
+    int percentTime,
+    std::size_t currentRounds,
+    std::size_t minimumRounds)
+{
+    // at() can throw, but the map is built by hand to ensure all valid
+    // values are available.
+    auto const& currentCutoff = p.avalancheCutoffs.at(currentState);
+    // Should we consider moving to the next state?
+    if (currentCutoff.next != currentState && currentRounds >= minimumRounds)
+    {
+        // at() can throw, but the map is built by hand to ensure all
+        // valid values are available.
+        auto const& nextCutoff = p.avalancheCutoffs.at(currentCutoff.next);
+        // See if enough time has passed to move on to the next.
+        XRPL_ASSERT(
+            nextCutoff.consensusTime >= currentCutoff.consensusTime,
+            "ripple::getNeededWeight : next state valid");
+        if (percentTime >= nextCutoff.consensusTime)
+        {
+            return {nextCutoff.consensusPct, currentCutoff.next};
+        }
+    }
+    return {currentCutoff.consensusPct, {}};
+}
+
+}  // namespace ripple

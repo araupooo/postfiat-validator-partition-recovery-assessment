@@ -1,0 +1,73 @@
+# Source excerpt E08 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/consensus/Consensus.h, lines 1367-1431.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: c600a12673215a68513542bac16b89dccabff37f3652d79b8159860b00898dd8
+# Source file git blob SHA: 9ccc080857e2be382365dff5f349544b9907d9cf
+# Source file size: 65913 bytes
+
+# --- src/xrpld/consensus/Consensus.h lines 1367-1431 ---
+Consensus<Adaptor>::phaseEstablish(
+    std::unique_ptr<std::stringstream> const& clog)
+{
+    CLOG(clog) << "phaseEstablish. ";
+    // can only establish consensus if we already took a stance
+    XRPL_ASSERT(result_, "ripple::Consensus::phaseEstablish : result is set");
+
+    ++peerUnchangedCounter_;
+    ++establishCounter_;
+
+    using namespace std::chrono;
+    ConsensusParms const& parms = adaptor_.parms();
+
+    result_->roundTime.tick(clock_.now());
+    result_->proposers = currPeerPositions_.size();
+
+    convergePercent_ = result_->roundTime.read() * 100 /
+        std::max<milliseconds>(prevRoundTime_, parms.avMIN_CONSENSUS_TIME);
+    CLOG(clog) << "convergePercent_ " << convergePercent_
+               << " is based on round duration so far: "
+               << result_->roundTime.read().count() << "ms, "
+               << "previous round duration: " << prevRoundTime_.count()
+               << "ms, "
+               << "avMIN_CONSENSUS_TIME: " << parms.avMIN_CONSENSUS_TIME.count()
+               << "ms. ";
+
+    // Give everyone a chance to take an initial position
+    if (result_->roundTime.read() < parms.ledgerMIN_CONSENSUS)
+    {
+        CLOG(clog) << "ledgerMIN_CONSENSUS not reached: "
+                   << parms.ledgerMIN_CONSENSUS.count() << "ms. ";
+        return;
+    }
+
+    updateOurPositions(clog);
+
+    // Nothing to do if too many laggards or we don't have consensus.
+    if (shouldPause(clog) || !haveConsensus(clog))
+        return;
+
+    if (!haveCloseTimeConsensus_)
+    {
+        JLOG(j_.info()) << "We have TX consensus but not CT consensus";
+        CLOG(clog) << "We have TX consensus but not CT consensus. ";
+        return;
+    }
+
+    JLOG(j_.info()) << "Converge cutoff (" << currPeerPositions_.size()
+                    << " participants)";
+    CLOG(clog) << "Converge cutoff (" << currPeerPositions_.size()
+               << " participants). Transitioned to ConsensusPhase::accepted. ";
+    adaptor_.updateOperatingMode(currPeerPositions_.size());
+    prevProposers_ = currPeerPositions_.size();
+    prevRoundTime_ = result_->roundTime.read();
+    phase_ = ConsensusPhase::accepted;
+    JLOG(j_.debug()) << "transitioned to ConsensusPhase::accepted";
+    adaptor_.onAccept(
+        *result_,
+        previousLedger_,
+        closeResolution_,
+        rawCloseTimes_,
+        mode_.get(),
+        getJson(true),
+        adaptor_.validating());
+}

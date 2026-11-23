@@ -1,0 +1,125 @@
+# Source excerpt E09 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/consensus/Consensus.h, lines 1689-1805.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: c600a12673215a68513542bac16b89dccabff37f3652d79b8159860b00898dd8
+# Source file git blob SHA: 9ccc080857e2be382365dff5f349544b9907d9cf
+# Source file size: 65913 bytes
+
+# --- src/xrpld/consensus/Consensus.h lines 1689-1805 ---
+Consensus<Adaptor>::haveConsensus(
+    std::unique_ptr<std::stringstream> const& clog)
+{
+    // Must have a stance if we are checking for consensus
+    XRPL_ASSERT(result_, "ripple::Consensus::haveConsensus : has result");
+
+    // CHECKME: should possibly count unacquired TX sets as disagreeing
+    int agree = 0, disagree = 0;
+
+    auto ourPosition = result_->position.position();
+
+    // Count number of agreements/disagreements with our position
+    for (auto const& [nodeId, peerPos] : currPeerPositions_)
+    {
+        Proposal_t const& peerProp = peerPos.proposal();
+        if (peerProp.position() == ourPosition)
+        {
+            ++agree;
+        }
+        else
+        {
+            JLOG(j_.debug()) << "Proposal disagreement: Peer " << nodeId
+                             << " has " << peerProp.position();
+            ++disagree;
+        }
+    }
+    auto currentFinished =
+        adaptor_.proposersFinished(previousLedger_, prevLedgerID_);
+
+    JLOG(j_.debug()) << "Checking for TX consensus: agree=" << agree
+                     << ", disagree=" << disagree;
+
+    ConsensusParms const& parms = adaptor_.parms();
+    // Stalling is BAD. It means that we have a consensus on the close time, so
+    // peers are talking, but we have disputed transactions that peers are
+    // unable or unwilling to come to agreement on one way or the other.
+    bool const stalled = haveCloseTimeConsensus_ &&
+        !result_->disputes.empty() &&
+        std::ranges::all_of(result_->disputes,
+                            [this, &parms, &clog](auto const& dispute) {
+                                return dispute.second.stalled(
+                                    parms,
+                                    mode_.get() == ConsensusMode::proposing,
+                                    peerUnchangedCounter_,
+                                    j_,
+                                    clog);
+                            });
+    if (stalled)
+    {
+        std::stringstream ss;
+        ss << "Consensus detects as stalled with " << (agree + disagree) << "/"
+           << prevProposers_ << " proposers, and " << result_->disputes.size()
+           << " stalled disputed transactions.";
+        JLOG(j_.error()) << ss.str();
+        CLOG(clog) << ss.str();
+    }
+
+    // Determine if we actually have consensus or not
+    result_->state = checkConsensus(
+        prevProposers_,
+        agree + disagree,
+        agree,
+        currentFinished,
+        prevRoundTime_,
+        result_->roundTime.read(),
+        stalled,
+        parms,
+        mode_.get() == ConsensusMode::proposing,
+        j_,
+        clog);
+
+    if (result_->state == ConsensusState::No)
+    {
+        CLOG(clog) << "No consensus. ";
+        return false;
+    }
+
+    // Consensus has taken far too long. Drop out of the round.
+    if (result_->state == ConsensusState::Expired)
+    {
+        static auto const minimumCounter =
+            parms.avalancheCutoffs.size() * parms.avMIN_ROUNDS;
+        std::stringstream ss;
+        if (establishCounter_ < minimumCounter)
+        {
+            // If each round of phaseEstablish takes a very long time, we may
+            // "expire" before we've given consensus enough time at each
+            // avalanche level to actually come to a consensus. In that case,
+            // keep trying. This should only happen if there are an extremely
+            // large number of disputes such that each round takes an inordinate
+            // amount of time.
+
+            ss << "Consensus time has expired in round " << establishCounter_
+               << "; continue until round " << minimumCounter << ". "
+               << Json::Compact{getJson(false)};
+            JLOG(j_.error()) << ss.str();
+            CLOG(clog) << ss.str() << ". ";
+            return false;
+        }
+        ss << "Consensus expired. " << Json::Compact{getJson(true)};
+        JLOG(j_.error()) << ss.str();
+        CLOG(clog) << ss.str() << ". ";
+        leaveConsensus(clog);
+    }
+    // There is consensus, but we need to track if the network moved on
+    // without us.
+    if (result_->state == ConsensusState::MovedOn)
+    {
+        JLOG(j_.error()) << "Unable to reach consensus";
+        JLOG(j_.error()) << Json::Compact{getJson(true)};
+        CLOG(clog) << "Unable to reach consensus "
+                   << Json::Compact{getJson(true)} << ". ";
+    }
+
+    CLOG(clog) << "Consensus has been reached. ";
+    return true;
+}

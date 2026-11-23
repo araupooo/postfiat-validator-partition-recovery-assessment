@@ -1,0 +1,1663 @@
+{
+ "_note": "Validator partition scenarios derived from postfiatd commit 0085a1ff885d6a446369cf73a4430f75af22be55. All expected_behavior statements are derived from pinned-code rules; every scenario carries a 'source' field citing file:line. Quorum rule throughout (identical UNL): max(ceil(effectiveUNL*0.67), ceil(UNL*0.60)). Modelled close time 4 s/ledger unless stated; close time is emergent in the code, not a constant.",
+ "default_seed": 0,
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55",
+ "scenarios": [
+  {
+   "duration_ledgers": 40,
+   "expected_behavior": "Majority side A (7 validators) collects 7 trusted validations per ledger, reaches quorum 7, and validates every ledger it closes. Minority side B (3 validators) collects 3 validations, never reaches quorum, so its ledgers close by consensus but are never validated: its validated sequence stalls while consensus rounds keep running (stalled/MovedOn/Expired exits, no deadlock). On heal, side B detects preferred-ledger divergence, discards its 40 unvalidated ledgers, and re-acquires side A's chain; final ledger hashes reconcile.",
+   "id": "S-01",
+   "name": "Minority/majority split 7/3",
+   "parameters": {
+    "amendment_support_yes": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "close_time_s": 4.0,
+    "heal_after_ledgers": 40,
+    "min_peer_count": 2,
+    "modelled_close_time_s": 4.0,
+    "negative_unl": [],
+    "start_seq": 8284000,
+    "unl_size": 10
+   },
+   "partition": {
+    "note": "Clean split: no cross-side traffic for 40 ledgers, then full heal.",
+    "sides": [
+     [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     [
+      7,
+      8,
+      9
+     ]
+    ]
+   },
+   "source": "src/xrpld/app/misc/detail/ValidatorList.cpp:1845-1935 (quorum max(ceil(eff*0.67), ceil(unl*0.60))); src/xrpld/app/ledger/detail/LedgerMaster.cpp:898-945 (checkAccept quorum gate); src/xrpld/consensus/Consensus.cpp:177-270 (No/Stalled/MovedOn/Expired exits); src/xrpld/consensus/Validations.h:850-899 (getPreferred); src/xrpld/consensus/Consensus.h:1063-1115 (handleWrongLedger)",
+   "topology": {
+    "links": [
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      0,
+      4
+     ],
+     [
+      0,
+      5
+     ],
+     [
+      0,
+      6
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ]
+    ],
+    "note": "10 validators, full mesh within each side during the partition; cross-side links cut.",
+    "validator_count": 10
+   }
+  },
+  {
+   "duration_ledgers": 40,
+   "expected_behavior": "Side A (6 validators) receives validations from both sides (6 own + 4 from B = 10) and reaches quorum 7, so it validates every ledger. Side B (4 validators) receives only its own 4 validations, never reaches quorum 7, and stalls validation while its consensus rounds keep running. The asymmetry is visible only in validation counts, not in peer counts: B sees A's proposals but A never sees B's acknowledgements of A's ledgers. On heal both sides reconcile to A's chain.",
+   "id": "S-02",
+   "name": "Asymmetric reachability (one-way link)",
+   "parameters": {
+    "amendment_support_yes": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "asymmetry": "B->A open (B validations reach A); A->B blocked (A validations never reach B)",
+    "close_time_s": 4.0,
+    "heal_after_ledgers": 40,
+    "min_peer_count": 2,
+    "modelled_close_time_s": 4.0,
+    "negative_unl": [],
+    "start_seq": 8284000,
+    "unl_size": 10
+   },
+   "partition": {
+    "note": "Directed partition: traffic flows B->A only; A->B is cut for 40 ledgers.",
+    "sides": [
+     [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+     ],
+     [
+      6,
+      7,
+      8,
+      9
+     ]
+    ]
+   },
+   "source": "src/xrpld/app/misc/detail/ValidatorList.cpp:1845-1935 (quorum 7 of 10); src/xrpld/app/ledger/detail/LedgerMaster.cpp:898-945 (checkAccept); src/xrpld/app/consensus/RCLValidations.cpp:166-277 (handleNewValidation: only trusted-current validations trigger checkAccept); src/xrpld/overlay/detail/PeerImp.cpp:1817-1875 (untrusted/diverged proposal drops)",
+   "topology": {
+    "links": [
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      0,
+      4
+     ],
+     [
+      0,
+      5
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      6,
+      7
+     ],
+     [
+      6,
+      8
+     ],
+     [
+      6,
+      9
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ]
+    ],
+    "note": "10 validators; one directed link B->A carries B validations to A, the reverse direction is cut.",
+    "validator_count": 10
+   }
+  },
+  {
+   "duration_ledgers": 60,
+   "expected_behavior": "While the link is down (5-ledger windows) the network is a 5/5 split and neither side reaches quorum 7, so no ledger validates on either side; consensus rounds still run and close ledgers. While the link is up (5-ledger windows) the full 10-validator set validates every ledger. No side ever validates alone, so no persistent fork forms: the only validated chain is the one built during up windows. Flapping therefore costs validation liveness (30 of 60 ledgers unvalidated) without creating a dual-validated fork.",
+   "id": "S-03",
+   "name": "Flapping links 5/5",
+   "parameters": {
+    "amendment_support_yes": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "close_time_s": 4.0,
+    "flap_down_ledgers": 5,
+    "flap_up_ledgers": 5,
+    "min_peer_count": 2,
+    "modelled_close_time_s": 4.0,
+    "negative_unl": [],
+    "start_seq": 8284000,
+    "unl_size": 10
+   },
+   "partition": {
+    "note": "Link alternates 5 ledgers up / 5 ledgers down for 60 ledgers; sides are [0-4] and [5-9] while down.",
+    "sides": [
+     [
+      0,
+      1,
+      2,
+      3,
+      4
+     ],
+     [
+      5,
+      6,
+      7,
+      8,
+      9
+     ]
+    ]
+   },
+   "source": "src/xrpld/app/misc/detail/ValidatorList.cpp:1845-1935 (quorum 7 of 10; a 5-validator side cannot reach it); src/xrpld/app/ledger/detail/LedgerMaster.cpp:898-945 (checkAccept); src/xrpld/consensus/Consensus.cpp:106-174 (checkConsensusReached: alone/stalled rules keep rounds moving)",
+   "topology": {
+    "links": [
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      0,
+      4
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      5,
+      8
+     ],
+     [
+      5,
+      9
+     ],
+     [
+      6,
+      7
+     ],
+     [
+      6,
+      8
+     ],
+     [
+      6,
+      9
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ]
+    ],
+    "note": "10 validators; the single cross-side link flaps on a fixed 5-ledger schedule.",
+    "validator_count": 10
+   }
+  },
+  {
+   "duration_ledgers": 40,
+   "expected_behavior": "The two sides trust divergent UNLs, so BOTH sides validate concurrently and a true dual-validated fork persists for the whole partition. Side A trusts 8 validators (its 7 plus validator 7); its quorum is max(ceil(8*0.67)=6, ceil(8*0.60)=5)=6 and it collects 7 validations. Side B trusts 7 validators (its 5 plus validators 0,1); its quorum is max(ceil(7*0.67)=5, ceil(7*0.60)=5)=5 and it collects 5 validations. Each side's chain is quorum-validated, so neither side's checkAccept stalls and preferred-ledger selection cannot resolve the fork until the UNLs reconverge. On heal the side with larger branch support wins (LedgerTrie getPreferred) and the loser discards its validated ledgers.",
+   "id": "S-04",
+   "name": "UNL subset isolation (divergent UNLs, dual validation)",
+   "parameters": {
+    "amendment_support_yes": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11
+    ],
+    "close_time_s": 4.0,
+    "heal_after_ledgers": 40,
+    "min_peer_count": 2,
+    "modelled_close_time_s": 4.0,
+    "negative_unl": [],
+    "start_seq": 8284000,
+    "unl_a": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "unl_b": [
+     0,
+     1,
+     7,
+     8,
+     9,
+     10,
+     11
+    ],
+    "unl_size_a": 8,
+    "unl_size_b": 7
+   },
+   "partition": {
+    "note": "12 validators split 7/5 with divergent UNLs: each side trusts mostly its own validators plus a few of the other side.",
+    "sides": [
+     [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     [
+      7,
+      8,
+      9,
+      10,
+      11
+     ]
+    ]
+   },
+   "source": "src/xrpld/app/misc/detail/ValidatorList.cpp:1845-1935 (quorum formula; comment cites Theorem 8 of Chase-MacBrough arXiv:1802.07242: two UNLs may share all but <33% of validators); src/xrpld/app/misc/detail/ValidatorList.cpp:1938-2131 (updateTrusted rebuilds the trusted set per close); src/xrpld/consensus/LedgerTrie.h:685-778 (getPreferred branch-support walk); src/xrpld/app/ledger/detail/LedgerMaster.cpp:898-945 (checkAccept)",
+   "topology": {
+    "links": [
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      0,
+      4
+     ],
+     [
+      0,
+      5
+     ],
+     [
+      0,
+      6
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      7,
+      10
+     ],
+     [
+      7,
+      11
+     ],
+     [
+      8,
+      9
+     ],
+     [
+      8,
+      10
+     ],
+     [
+      8,
+      11
+     ],
+     [
+      9,
+      10
+     ],
+     [
+      9,
+      11
+     ],
+     [
+      10,
+      11
+     ]
+    ],
+    "note": "12 validators; cross-side links cut; trust lists diverge (see parameters unl_a/unl_b).",
+    "validator_count": 12
+   }
+  },
+  {
+   "duration_ledgers": 60,
+   "expected_behavior": "A flag ledger (sequence 8283904, seq % 256 == 0) falls inside the partition. Voting happens on the pre-flag ledger: side A counts 7 trusted validations, all voting yes, which exceeds the post-fix threshold (7 > 7*67/100 = 4.69), so side A records tfGotMajority in its next ledger. Side B counts 3 trusted validations with 1 yes vote; 1 > 3*67/100 = 2.01 is false, so side B records no majority and its amendment clock freezes (no voting at all would occur if it were below quorum: onClose requires >= quorum() trusted validations). Neither side enables the amendment inside the scenario: the 2-week hold (1,209,600 s) needs 302,400 ledgers at the modelled 4 s/ledger close, far beyond the 60-ledger window. On heal, the surviving majority timestamps are side A's, because only its chain is validated.",
+   "id": "S-05",
+   "name": "Amendment-vote split across a flag ledger",
+   "parameters": {
+    "amendment_id": "SIMULATED-AMENDMENT-1",
+    "amendment_support_yes": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "close_time_s": 4.0,
+    "flag_ledger_seq": 8283904,
+    "heal_after_ledgers": 60,
+    "majority_hold_seconds": 1209600,
+    "min_peer_count": 2,
+    "modelled_close_time_s": 4.0,
+    "negative_unl": [],
+    "start_seq": 8283900,
+    "unl_size": 10
+   },
+   "partition": {
+    "note": "7/3 split straddling flag ledger 8283904; amendment support is 7/7 yes on side A and 1/3 yes on side B (8/10 overall).",
+    "sides": [
+     [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     [
+      7,
+      8,
+      9
+     ]
+    ]
+   },
+   "source": "src/xrpld/app/misc/detail/AmendmentTable.cpp:320-375 (post-fix threshold trusted*67/100, strictly greater); include/xrpl/protocol/SystemParameters.h:80-88 (postFix ratio<67,100>; defaultAmendmentMajorityTime 2 weeks); src/xrpld/app/ledger/Ledger.h:426 (FLAG_LEDGER_INTERVAL 256); src/xrpld/app/consensus/RCLConsensus.cpp:353-380 (onClose flag-ledger gate: voting only when trusted validations >= quorum()); src/xrpld/app/misc/detail/AmendmentTable.cpp:847-941 (doVoting tfGotMajority/tfLostMajority)",
+   "topology": {
+    "links": [
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      0,
+      4
+     ],
+     [
+      0,
+      5
+     ],
+     [
+      0,
+      6
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ]
+    ],
+    "note": "10 validators, full mesh within each side; cross-side links cut.",
+    "validator_count": 10
+   }
+  },
+  {
+   "duration_ledgers": 40,
+   "expected_behavior": "The minority side (3 validators) keeps running consensus rounds but never validates: every round ends via the stalled-dispute shortcut, MovedOn, or Expired/bow-out exits, never via quorum. Close-time consensus (75%) is never reached inside the minority side, whose three validators' close-time votes disagree with each other (modelled clock drift under partition), so its close-time resolution coarsens one bin per ledger (30 -> 60 -> 90 -> 120 s) and its ledgers carry the sLCF_NoConsensusTime flag (closeFlags 0x01). The majority side (7 validators) validates normally with resolution refining toward 10-20 s bins. The minority's close-time drift is an observable partition signal, not a halt.",
+   "id": "S-06",
+   "name": "Ledger-close stall with close-time drift",
+   "parameters": {
+    "amendment_support_yes": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "close_time_s": 4.0,
+    "heal_after_ledgers": 40,
+    "min_peer_count": 2,
+    "minority_close_time_disagreement": true,
+    "modelled_close_time_s": 4.0,
+    "negative_unl": [],
+    "start_seq": 8284000,
+    "unl_size": 10
+   },
+   "partition": {
+    "note": "7/3 split; the minority side's close times diverge from the majority's every ledger.",
+    "sides": [
+     [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     [
+      7,
+      8,
+      9
+     ]
+    ]
+   },
+   "source": "src/xrpld/consensus/ConsensusParms.h:146-160 (avalanche cutoffs; avCT_CONSENSUS_PCT 75); src/xrpld/consensus/LedgerTiming.h:35-53 (bins {10,20,30,60,90,120}, default 30) and 80-140 (getNextLedgerTimeResolution coarsens on disagreement); src/xrpld/consensus/Consensus.cpp:106-174 (stalled shortcut) and 177-270 (MovedOn/Expired); src/xrpld/app/consensus/RCLConsensus.cpp:474-729 (doAccept sets consensusCloseTime = prev + 1s and closeTimeCorrect = false); include/xrpl/protocol/LedgerHeader.h:82 (sLCF_NoConsensusTime 0x01)",
+   "topology": {
+    "links": [
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      0,
+      4
+     ],
+     [
+      0,
+      5
+     ],
+     [
+      0,
+      6
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ]
+    ],
+    "note": "10 validators, full mesh within each side; cross-side links cut.",
+    "validator_count": 10
+   }
+  },
+  {
+   "duration_ledgers": 30,
+   "expected_behavior": "The isolated validator (9) has 0 peers, below minPeerCount, so its operating mode is DISCONNECTED and consensus is not ticked at all (NetworkOPs heartbeat gate). It closes no ledgers and validates nothing while isolated. The remaining 9 validators collect 9 trusted validations, reach quorum 7, and validate every ledger. On heal, the isolated node re-enters CONNECTED, its preferred ledger differs from its local LCL, handleWrongLedger fires, and it acquires the majority chain ledger by ledger (each missing ledger costs at most ~21 s of InboundLedger attempts: initial + 6 retries at 3 s). No fork is created: a single validator cannot validate alone.",
+   "id": "S-07",
+   "name": "Single-validator isolation",
+   "parameters": {
+    "amendment_support_yes": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "close_time_s": 4.0,
+    "heal_after_ledgers": 30,
+    "isolated_validator": 9,
+    "min_peer_count": 2,
+    "modelled_close_time_s": 4.0,
+    "negative_unl": [],
+    "start_seq": 8284000,
+    "unl_size": 10
+   },
+   "partition": {
+    "note": "Validator 9 fully isolated for 30 ledgers; the other 9 stay connected.",
+    "sides": [
+     [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+     ],
+     [
+      9
+     ]
+    ]
+   },
+   "source": "src/xrpld/app/misc/NetworkOPs.cpp:1049-1078 (below minPeerCount_ forces DISCONNECTED, consensus not ticked); src/xrpld/consensus/Consensus.cpp:106-174 (total == 0 alone case: consensus only after ledgerMAX_CONSENSUS 15 s); src/xrpld/consensus/Consensus.h:1063-1115 (handleWrongLedger) and 1119-1148 (checkLedger); src/xrpld/app/ledger/detail/InboundLedger.cpp:44-74 (3 s timeout, 6 retries) and 366-413 (onTimer give-up after >6 timeouts, ~21 s per ledger)",
+   "topology": {
+    "links": [
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      0,
+      4
+     ],
+     [
+      0,
+      5
+     ],
+     [
+      0,
+      6
+     ],
+     [
+      0,
+      7
+     ],
+     [
+      0,
+      8
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      1,
+      8
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      2,
+      7
+     ],
+     [
+      2,
+      8
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      3,
+      7
+     ],
+     [
+      3,
+      8
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      4,
+      8
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      5,
+      8
+     ],
+     [
+      6,
+      7
+     ],
+     [
+      6,
+      8
+     ],
+     [
+      7,
+      8
+     ]
+    ],
+    "note": "10 validators; validator 9 has no links at all during the partition.",
+    "validator_count": 10
+   }
+  },
+  {
+   "duration_ledgers": 30,
+   "expected_behavior": "No partition exists, but 2 of 3 list publishers are unavailable while listThreshold_ is 2 (majority of 3 publishers). The unavailable-publisher count (2) reaches min(listThreshold_, N - listThreshold_ + 1) = min(2, 2) = 2, so calculateQuorum returns SIZE_MAX: quorum is disabled and NOTHING validates on any node, even though all 10 validators are connected and agree. Consensus rounds still close ledgers. When the publishers return, updateTrusted recomputes quorum 7 and validation resumes from the next close. Publisher outage is a whole-network validation freeze, not a partition.",
+   "id": "S-08",
+   "name": "Publisher outage disables quorum",
+   "parameters": {
+    "amendment_support_yes": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "close_time_s": 4.0,
+    "list_threshold": 2,
+    "min_peer_count": 2,
+    "modelled_close_time_s": 4.0,
+    "negative_unl": [],
+    "publishers_total": 3,
+    "publishers_unavailable": 2,
+    "start_seq": 8284000,
+    "unl_size": 10
+   },
+   "partition": {
+    "note": "No split: all 10 validators connected; the outage is in the publisher lists, not the links.",
+    "sides": [
+     [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ]
+    ]
+   },
+   "source": "src/xrpld/app/misc/detail/ValidatorList.cpp:1845-1935 (quorum disabled SIZE_MAX when unavailable publishers >= min(listThreshold_, N - listThreshold_ + 1)); src/xrpld/app/misc/detail/ValidatorList.cpp:197-216 (listThreshold_ = size/2+1); src/xrpld/app/misc/detail/ValidatorList.cpp:1938-2131 (updateTrusted recomputes quorum per close; empty trusted set locks down via setUNLBlocked); src/xrpld/app/misc/detail/ValidatorSite.cpp:34 (refresh default 5 min)",
+   "topology": {
+    "links": [
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      0,
+      4
+     ],
+     [
+      0,
+      5
+     ],
+     [
+      0,
+      6
+     ],
+     [
+      0,
+      7
+     ],
+     [
+      0,
+      8
+     ],
+     [
+      0,
+      9
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      1,
+      8
+     ],
+     [
+      1,
+      9
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      2,
+      7
+     ],
+     [
+      2,
+      8
+     ],
+     [
+      2,
+      9
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      3,
+      7
+     ],
+     [
+      3,
+      8
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      4,
+      7
+     ],
+     [
+      4,
+      8
+     ],
+     [
+      4,
+      9
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      5,
+      7
+     ],
+     [
+      5,
+      8
+     ],
+     [
+      5,
+      9
+     ],
+     [
+      6,
+      7
+     ],
+     [
+      6,
+      8
+     ],
+     [
+      6,
+      9
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ]
+    ],
+    "note": "10 validators, full mesh; all links up for the whole scenario.",
+    "validator_count": 10
+   }
+  },
+  {
+   "duration_ledgers": 200,
+   "expected_behavior": "The 7/3 split lasts 200 ledgers at a modelled 4 s/ledger = 800 s of simulated time. Pre-partition validations go stale: WALL 5 min (300 s, 75 ledgers) and LOCAL 3 min (180 s, 45 ledgers) pass first, then the validation SET expires at 10 min (600 s, 150 ledgers) and Validations::expire sweeps the minority side's pre-partition sets. After ledger 150 the minority side holds no usable pre-partition validation for any ledger; on heal it cannot shortcut rejoin from stale sets and must re-acquire the majority chain fresh (40+ ledgers of its own chain are unvalidated and discarded). The majority side is unaffected: it keeps receiving fresh validations inside every window. The cascade is time-driven, not count-driven: a shorter partition would not trigger it.",
+   "id": "S-09",
+   "name": "Validation-expiry cascade (long partition)",
+   "parameters": {
+    "amendment_support_yes": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "close_time_s": 4.0,
+    "heal_after_ledgers": 200,
+    "min_peer_count": 2,
+    "modelled_close_time_s": 4.0,
+    "negative_unl": [],
+    "start_seq": 8284000,
+    "unl_size": 10,
+    "validation_current_early_s": 180,
+    "validation_current_local_s": 180,
+    "validation_current_wall_s": 300,
+    "validation_set_expires_s": 600
+   },
+   "partition": {
+    "note": "7/3 split for 200 ledgers (800 s simulated), long enough to cross all three validation windows and the 10-minute set expiry.",
+    "sides": [
+     [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     [
+      7,
+      8,
+      9
+     ]
+    ]
+   },
+   "source": "src/xrpld/consensus/Validations.h:47-94 (ValidationParms: WALL 5 min, LOCAL 3 min, EARLY 3 min, SET_EXPIRES 10 min, FRESHNESS 20 s); src/xrpld/consensus/Validations.h:149-166 (isCurrent three-window test); src/xrpld/consensus/Validations.h:730-783 (expire sweeps sets older than SET_EXPIRES); src/xrpld/consensus/Validations.h:624-707 (add rejects stale validations)",
+   "topology": {
+    "links": [
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      0,
+      4
+     ],
+     [
+      0,
+      5
+     ],
+     [
+      0,
+      6
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ]
+    ],
+    "note": "10 validators, full mesh within each side; cross-side links cut.",
+    "validator_count": 10
+   }
+  },
+  {
+   "duration_ledgers": 40,
+   "expected_behavior": "After a 7/3 split of 40 ledgers, the heal is a race between the minority side's unvalidated chain and the majority's validated chain. Preferred-ledger selection (branch support) picks the majority chain: its branch support is 7 trusted validations per ledger against the minority's 3. The minority side's handleWrongLedger fires, it stops proposing, replays stored proposals, and acquires the majority chain via InboundLedger: 40 ledgers re-fetched, each on the first 3 s attempt (peers hold them), 0 timeouts, worst-case bound 40 x ~21 s if peers lacked them. Every minority ledger whose parent hash mismatches the adopted chain is invalidated by setFullLedger (hash-chained reconciliation, not transaction replay). Final ledger hashes match across all 10 validators; 0 minority ledgers survive as canonical.",
+   "id": "S-10",
+   "name": "Rejoin hash-reconciliation race",
+   "parameters": {
+    "amendment_support_yes": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "close_time_s": 4.0,
+    "heal_after_ledgers": 40,
+    "min_peer_count": 2,
+    "modelled_close_time_s": 4.0,
+    "negative_unl": [],
+    "start_seq": 8284000,
+    "unl_size": 10
+   },
+   "partition": {
+    "note": "7/3 split for 40 ledgers, then heal; the rejoin itself is the scenario under test.",
+    "sides": [
+     [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+     ],
+     [
+      7,
+      8,
+      9
+     ]
+    ]
+   },
+   "source": "src/xrpld/consensus/Validations.h:850-899 (getPreferred) and 936-960 (getPreferredLCL); src/xrpld/consensus/LedgerTrie.h:685-778 (getPreferred branch-support walk); src/xrpld/consensus/Consensus.h:1063-1115 (handleWrongLedger) and 1152-1168 (playbackProposals); src/xrpld/app/ledger/detail/InboundLedger.cpp:44-74 (3 s timeout, 5 start peers, +3 per timeout, 6 retries) and 366-413 (onTimer); src/xrpld/app/ledger/detail/LedgerMaster.cpp:826-886 (setFullLedger invalidates on parent-hash mismatch); src/xrpld/app/ledger/Ledger.cpp:54-68 (calculateLedgerHash over 10 fields)",
+   "topology": {
+    "links": [
+     [
+      0,
+      1
+     ],
+     [
+      0,
+      2
+     ],
+     [
+      0,
+      3
+     ],
+     [
+      0,
+      4
+     ],
+     [
+      0,
+      5
+     ],
+     [
+      0,
+      6
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      2,
+      4
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      2,
+      6
+     ],
+     [
+      3,
+      4
+     ],
+     [
+      3,
+      5
+     ],
+     [
+      3,
+      6
+     ],
+     [
+      4,
+      5
+     ],
+     [
+      4,
+      6
+     ],
+     [
+      5,
+      6
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      8,
+      9
+     ]
+    ],
+    "note": "10 validators, full mesh within each side during the partition; cross-side links cut, then restored.",
+    "validator_count": 10
+   }
+  }
+ ],
+ "schema_version": 1
+}

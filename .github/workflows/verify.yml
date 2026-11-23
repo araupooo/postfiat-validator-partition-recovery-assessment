@@ -1,0 +1,45 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Verify shipped digests
+        run: bash scripts/verify_digests.sh
+
+      - name: Show simulator interface
+        run: python3 src/partition_sim.py --help
+
+      - name: Run full suite
+        run: bash scripts/run_all.sh
+
+      - name: Check run summary
+        run: |
+          python3 - <<'EOF'
+          import json
+          s = json.load(open("outputs/derived/run-summary.json"))
+          assert s["pinned_commit"] == "0085a1ff885d6a446369cf73a4430f75af22be55", s
+          assert s["scenario_count"] == 10, s
+          assert s["steps"]["scenarios"] == "pass", s["steps"]
+          # The simulator is a stub until implemented: "not_implemented" is
+          # the expected skeleton state; "pass" is the implemented state.
+          assert s["steps"]["simulator"] in ("pass", "not_implemented"), s["steps"]
+          for k, v in s["steps"].items():
+              assert v == "pass" or v.startswith("skipped") or v == "not_implemented", (k, v)
+          print("run-summary OK:", s["steps"])
+          EOF
+
+      - name: Verify regenerated digests
+        run: bash scripts/verify_digests.sh

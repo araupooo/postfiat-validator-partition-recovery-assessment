@@ -32,7 +32,7 @@ re-establishment, not on link restoration.**
   round 75, SET_EXPIRES round 150; 3 pre-partition sets swept.
 - Drills: 29/29 checks PASS (A 10, B 4, C 3, D 2, E 3, F 2, G 2, H 2,
   T 1), each re-derived from `outputs/derived/scenario-results.json`.
-- Excerpts: 35 verbatim pinned-source excerpts, 16 source files,
+- Excerpts: 36 verbatim pinned-source excerpts, 16 source files,
   blob SHAs cross-checked against the GitHub API.
 
 ## Counts
@@ -72,7 +72,7 @@ in the pack.
   digests.
 - `configs/scenarios.json` — the 10 scenarios with topology, partition,
   parameters, expected behaviour, and per-scenario pinned-code sources.
-- `fixtures/source-excerpts/` — 35 verbatim pinned-source excerpts
+- `fixtures/source-excerpts/` — 36 verbatim pinned-source excerpts
   with file paths and grep-verified line numbers.
 - `fixtures/source-hashes.json` — SHA-256 digests and git blob SHAs
   for every cited source file.

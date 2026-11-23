@@ -1,0 +1,39 @@
+# Source excerpt E36 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/ValidatorList.cpp, lines 190-220.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: a1499c9c0f43be56ea657b2940701a38898117fb0dbdf83cf481de65cad503d4
+# Source file git blob SHA: 861e2112c1f9355e03b9e42a7565cf6f37cf8c2e
+# Source file size: 72746 bytes
+
+# --- src/xrpld/app/misc/detail/ValidatorList.cpp lines 190-220 ---
+            continue;
+        }
+
+        publisherLists_[id].status = status;
+        ++count;
+    }
+
+    if (listThreshold)
+    {
+        listThreshold_ = *listThreshold;
+        // This should be enforced by Config class
+        XRPL_ASSERT(
+            listThreshold_ > 0 && listThreshold_ <= publisherLists_.size(),
+            "ripple::ValidatorList::load : list threshold inside range");
+        JLOG(j_.debug()) << "Validator list threshold set in configuration to "
+                         << listThreshold_;
+    }
+    else
+    {
+        // Want truncated result when dividing an odd integer
+        listThreshold_ = (publisherLists_.size() < 3)
+            ? 1  //
+            : publisherLists_.size() / 2 + 1;
+        JLOG(j_.debug()) << "Validator list threshold computed as "
+                         << listThreshold_;
+    }
+
+    JLOG(j_.debug()) << "Loaded " << count << " keys";
+
+    if (localSigningKey)
+        localPubKey_ = validatorManifests_.getMasterKey(*localSigningKey);

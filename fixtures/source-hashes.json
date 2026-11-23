@@ -1,0 +1,356 @@
+{
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55",
+ "repo": "postfiatd",
+ "files": {
+  "src/xrpld/consensus/ConsensusParms.h": {
+   "sha256": "95f6ea2da07862ff830ab2eaab0f3b384fb89b29260a6b717b2f6c2b7380cca7",
+   "git_blob_sha": "d565bd9a5228de171cc777a0a098592f9e8505df",
+   "lines": 202,
+   "size_bytes": 8302
+  },
+  "src/xrpld/consensus/Consensus.cpp": {
+   "sha256": "45a11b3c51b3cbc028feb4f426caa5b603ab1bb56a53ca616cf3e16d3a483454",
+   "git_blob_sha": "e7b66899a83569f1120729a3cc2bd0e25540b622",
+   "lines": 272,
+   "size_bytes": 10139
+  },
+  "src/xrpld/consensus/Consensus.h": {
+   "sha256": "c600a12673215a68513542bac16b89dccabff37f3652d79b8159860b00898dd8",
+   "git_blob_sha": "9ccc080857e2be382365dff5f349544b9907d9cf",
+   "lines": 1926,
+   "size_bytes": 65913
+  },
+  "src/xrpld/consensus/LedgerTiming.h": {
+   "sha256": "371b38d96e1cee1662f6a585a6d75bd72e59d2329f9bdd34f66beb0ff3470031",
+   "git_blob_sha": "434f19b081886221689718818c6aae53f89a074b",
+   "lines": 172,
+   "size_bytes": 6559
+  },
+  "src/xrpld/consensus/Validations.h": {
+   "sha256": "e08b8fca2955b9c45c4673b4e873712c8d7ded405e3952ee011adea53c3d19da",
+   "git_blob_sha": "c333aeaefd7890bf1c7d19e56eadbae0b788602e",
+   "lines": 1179,
+   "size_bytes": 39557
+  },
+  "src/xrpld/consensus/LedgerTrie.h": {
+   "sha256": "ad4bd848f137566143a3929d6fa26ff56d2754480da4a1f12c5e22b8ef4bd4de",
+   "git_blob_sha": "17f9e570b0e80d13414bd0a0369e38124d432b0e",
+   "lines": 853,
+   "size_bytes": 27368
+  },
+  "src/xrpld/app/consensus/RCLValidations.cpp": {
+   "sha256": "cf96cc049a4050d61926c57af4e5021845ee0e0553ff25daf66354f800ccbd32",
+   "git_blob_sha": "669d69957da77a68bb5ace92a5e0ff789572be85",
+   "lines": 279,
+   "size_bytes": 9726
+  },
+  "src/xrpld/app/consensus/RCLConsensus.cpp": {
+   "sha256": "72716393a820832d7fd6f6084f4ac9534fdc7ccf09c10f5aa8d2f129828a0cee",
+   "git_blob_sha": "457555cc1c83cb617a6838e0099fc93e1d715b49",
+   "lines": 1156,
+   "size_bytes": 37567
+  },
+  "src/xrpld/app/misc/detail/ValidatorList.cpp": {
+   "sha256": "a1499c9c0f43be56ea657b2940701a38898117fb0dbdf83cf481de65cad503d4",
+   "git_blob_sha": "861e2112c1f9355e03b9e42a7565cf6f37cf8c2e",
+   "lines": 2193,
+   "size_bytes": 72746
+  },
+  "src/xrpld/app/misc/detail/AmendmentTable.cpp": {
+   "sha256": "17442288c19bbf1cf0da1a85e596e3add6218757ec91a22f353cd03e2edbaf33",
+   "git_blob_sha": "b13e40c3aed1ec8dbd9ec68a464caa5f512f113f",
+   "lines": 1084,
+   "size_bytes": 34890
+  },
+  "include/xrpl/protocol/SystemParameters.h": {
+   "sha256": "1ddb7af3e76708103ed5a43320fbeceeaa9b95ed06a436020790a12c55226fcc",
+   "git_blob_sha": "48202928205df69ede2398618420d5585d82b3c4",
+   "lines": 95,
+   "size_bytes": 3242
+  },
+  "src/xrpld/app/ledger/Ledger.cpp": {
+   "sha256": "8c56833ab46470050f355c06efec642ed4054209ffcb63084aca9da734f82516",
+   "git_blob_sha": "26552704258627756361a07e0c85a260ed229321",
+   "lines": 1166,
+   "size_bytes": 33022
+  },
+  "src/xrpld/app/ledger/detail/LedgerMaster.cpp": {
+   "sha256": "eff20a953d6b6fafe7ca44a2999a4c90c5ef62eea82e43baed8ba3e959da5ef1",
+   "git_blob_sha": "67826c253286c69622334382ac89db711c7a60d2",
+   "lines": 2285,
+   "size_bytes": 70382
+  },
+  "src/xrpld/app/ledger/detail/InboundLedger.cpp": {
+   "sha256": "bed5f8eece16ae34ded38d3c1dd09019b76ef9703be7b14441efb27d71c08f07",
+   "git_blob_sha": "47d546c3af380a5baea9dd2536daf9e34a324f3f",
+   "lines": 1356,
+   "size_bytes": 38190
+  },
+  "src/xrpld/app/misc/NetworkOPs.cpp": {
+   "sha256": "00d9166875577d5e620b3954ec107b0ba81b3884f180463fbcff169a2304991d",
+   "git_blob_sha": "57331a855843f0a528289fb3a96f3251926a3aa5",
+   "lines": 4913,
+   "size_bytes": 158487
+  },
+  "src/xrpld/consensus/DisputedTx.h": {
+   "sha256": "49c22b1cc25a55834b59dff8ee0161ef7b973a9110844d1b6af1001a1ebc9149",
+   "git_blob_sha": "19df205249720c26747d359ec6f9542395c2c038",
+   "lines": 365,
+   "size_bytes": 11494
+  }
+ },
+ "excerpts": {
+  "E01": {
+   "sha256": "a56d90c73a0ed38bdedeb3702fae30f7a110618239112186364b05e58fdf24b7",
+   "file": "src/xrpld/consensus/ConsensusParms.h",
+   "lines": "79-114",
+   "blob_sha": "d565bd9a5228de171cc777a0a098592f9e8505df",
+   "blob_size": 8302
+  },
+  "E02": {
+   "sha256": "783dbddb7a4c1dc83cc136efdcb093b0cdbaa663ddec525b3895d23f70485651",
+   "file": "src/xrpld/consensus/ConsensusParms.h",
+   "lines": "146-169",
+   "blob_sha": "d565bd9a5228de171cc777a0a098592f9e8505df",
+   "blob_size": 8302
+  },
+  "E03": {
+   "sha256": "7adbe8e2c1abfed9263561165303704cd2b003de7b5d2c6a8b66af61ce211bf3",
+   "file": "src/xrpld/consensus/ConsensusParms.h",
+   "lines": "175-201",
+   "blob_sha": "d565bd9a5228de171cc777a0a098592f9e8505df",
+   "blob_size": 8302
+  },
+  "E04": {
+   "sha256": "d1771289e42883982d9ed42df1695b7fd66461ae5bb509fe3e0f15ba3db43467",
+   "file": "src/xrpld/consensus/Consensus.cpp",
+   "lines": "28-103",
+   "blob_sha": "e7b66899a83569f1120729a3cc2bd0e25540b622",
+   "blob_size": 10139
+  },
+  "E05": {
+   "sha256": "414292892d92e917d8570d202e5208bf39192a65e6bf1e7015709f07067cc6bb",
+   "file": "src/xrpld/consensus/Consensus.cpp",
+   "lines": "106-174",
+   "blob_sha": "e7b66899a83569f1120729a3cc2bd0e25540b622",
+   "blob_size": 10139
+  },
+  "E06": {
+   "sha256": "4fe9e78b1209be134ae325f83da3c59a4c13dbcd9a374453c2ade4662122765c",
+   "file": "src/xrpld/consensus/Consensus.cpp",
+   "lines": "177-270",
+   "blob_sha": "e7b66899a83569f1120729a3cc2bd0e25540b622",
+   "blob_size": 10139
+  },
+  "E07": {
+   "sha256": "c1063942e389bbce65f503d88e44170e6eccfa49e5702efb4023e33070d6b577",
+   "file": "src/xrpld/consensus/Consensus.h",
+   "lines": "1169-1240",
+   "blob_sha": "9ccc080857e2be382365dff5f349544b9907d9cf",
+   "blob_size": 65913
+  },
+  "E08": {
+   "sha256": "03cad4a04b2a29343a1676f52d6c2888890439d507c80bfbde9d42c5ac23863b",
+   "file": "src/xrpld/consensus/Consensus.h",
+   "lines": "1367-1431",
+   "blob_sha": "9ccc080857e2be382365dff5f349544b9907d9cf",
+   "blob_size": 65913
+  },
+  "E09": {
+   "sha256": "5dbdc1d0a630012f3a7d5b1920075c0c78d45b94fe62b0979129591f44606707",
+   "file": "src/xrpld/consensus/Consensus.h",
+   "lines": "1689-1805",
+   "blob_sha": "9ccc080857e2be382365dff5f349544b9907d9cf",
+   "blob_size": 65913
+  },
+  "E10": {
+   "sha256": "bd339773f1f320153146bc2f6eb62b336c09aa740cb80f6574f7312a09c38d96",
+   "file": "src/xrpld/consensus/Consensus.h",
+   "lines": "1493-1685",
+   "blob_sha": "9ccc080857e2be382365dff5f349544b9907d9cf",
+   "blob_size": 65913
+  },
+  "E11": {
+   "sha256": "d388393b29cfb63026374e6619f0b02517966f873df47afd886a06caa8e24949",
+   "file": "src/xrpld/consensus/Consensus.h",
+   "lines": "1063-1115",
+   "blob_sha": "9ccc080857e2be382365dff5f349544b9907d9cf",
+   "blob_size": 65913
+  },
+  "E12": {
+   "sha256": "1c431615e09be6fff4ca16d03e0037961e9d89d956a80e8ca35e2f7f4747f9b7",
+   "file": "src/xrpld/consensus/Consensus.h",
+   "lines": "1119-1148",
+   "blob_sha": "9ccc080857e2be382365dff5f349544b9907d9cf",
+   "blob_size": 65913
+  },
+  "E13": {
+   "sha256": "4ef75c53d572b17c52e19b41919dfa87c6485c06648fbf91d729423d274231eb",
+   "file": "src/xrpld/consensus/LedgerTiming.h",
+   "lines": "35-53",
+   "blob_sha": "434f19b081886221689718818c6aae53f89a074b",
+   "blob_size": 6559
+  },
+  "E14": {
+   "sha256": "b95674732476965bad24141614c2f7c858b5f531680b3ef866686a549bfe6662",
+   "file": "src/xrpld/consensus/LedgerTiming.h",
+   "lines": "80-128",
+   "blob_sha": "434f19b081886221689718818c6aae53f89a074b",
+   "blob_size": 6559
+  },
+  "E15": {
+   "sha256": "f49ed3339544f7f3c1dd2b6ad96fa77e9722bea938e8be557754c7125029df92",
+   "file": "src/xrpld/consensus/Validations.h",
+   "lines": "47-94",
+   "blob_sha": "c333aeaefd7890bf1c7d19e56eadbae0b788602e",
+   "blob_size": 39557
+  },
+  "E16": {
+   "sha256": "ae5cda8978b20ba65e25f536312e60685a7a4537084d5ffc298100f44f3700f4",
+   "file": "src/xrpld/consensus/Validations.h",
+   "lines": "149-166",
+   "blob_sha": "c333aeaefd7890bf1c7d19e56eadbae0b788602e",
+   "blob_size": 39557
+  },
+  "E17": {
+   "sha256": "0b2cfdb90aba19794f0a7af634412f058ed0d2e954a2daf7f0e68397c3cf9903",
+   "file": "src/xrpld/consensus/Validations.h",
+   "lines": "624-707",
+   "blob_sha": "c333aeaefd7890bf1c7d19e56eadbae0b788602e",
+   "blob_size": 39557
+  },
+  "E18": {
+   "sha256": "a0dc3ef9682a393f3f08b04648f6a25cd866afae33d2f5bd21a6c687035b51bb",
+   "file": "src/xrpld/consensus/Validations.h",
+   "lines": "730-783",
+   "blob_sha": "c333aeaefd7890bf1c7d19e56eadbae0b788602e",
+   "blob_size": 39557
+  },
+  "E19": {
+   "sha256": "6b7c7a60af8e3c3fc141ad2665cf2173b96013ac601412f617119b4ecfbb3078",
+   "file": "src/xrpld/consensus/Validations.h",
+   "lines": "850-899",
+   "blob_sha": "c333aeaefd7890bf1c7d19e56eadbae0b788602e",
+   "blob_size": 39557
+  },
+  "E20": {
+   "sha256": "f334e3b9083564337e6377cfb22c99033e9de5ccdba439708de86a39b920ba91",
+   "file": "src/xrpld/consensus/Validations.h",
+   "lines": "936-960",
+   "blob_sha": "c333aeaefd7890bf1c7d19e56eadbae0b788602e",
+   "blob_size": 39557
+  },
+  "E21": {
+   "sha256": "f04b5db9dcd99e86ebad8b46e42ae4181fb05442ba041434a643535847bfa71c",
+   "file": "src/xrpld/consensus/LedgerTrie.h",
+   "lines": "685-778",
+   "blob_sha": "17f9e570b0e80d13414bd0a0369e38124d432b0e",
+   "blob_size": 27368
+  },
+  "E22": {
+   "sha256": "8fb78a5e43a6de35c4865b10d5c8aa49fb2d9c1b61efc710b80ae9058d1dc00a",
+   "file": "src/xrpld/app/consensus/RCLValidations.cpp",
+   "lines": "166-277",
+   "blob_sha": "669d69957da77a68bb5ace92a5e0ff789572be85",
+   "blob_size": 9726
+  },
+  "E23": {
+   "sha256": "69cece9575c24fc7b09da28fa200025ed8b4e843dd6dc3ab0c17dc7594a0ffee",
+   "file": "src/xrpld/app/consensus/RCLConsensus.cpp",
+   "lines": "814-932",
+   "blob_sha": "457555cc1c83cb617a6838e0099fc93e1d715b49",
+   "blob_size": 37567
+  },
+  "E24": {
+   "sha256": "f6a92eec5199917bed90c1e4fe4a310edc6af93ff496cac8c83b96c5795f06a1",
+   "file": "src/xrpld/app/consensus/RCLConsensus.cpp",
+   "lines": "353-380",
+   "blob_sha": "457555cc1c83cb617a6838e0099fc93e1d715b49",
+   "blob_size": 37567
+  },
+  "E25": {
+   "sha256": "7242c865c0cd8ec5a5886c2f95d98020ff3b5a14391605d0eea1faa0e25f1bbd",
+   "file": "src/xrpld/app/misc/detail/ValidatorList.cpp",
+   "lines": "1845-1935",
+   "blob_sha": "861e2112c1f9355e03b9e42a7565cf6f37cf8c2e",
+   "blob_size": 72746
+  },
+  "E26": {
+   "sha256": "48681dc1132709a44c459f15dbf735a62f5989e6805ccd760548c2c35b4fbc82",
+   "file": "src/xrpld/app/misc/detail/ValidatorList.cpp",
+   "lines": "1938-2131",
+   "blob_sha": "861e2112c1f9355e03b9e42a7565cf6f37cf8c2e",
+   "blob_size": 72746
+  },
+  "E27": {
+   "sha256": "45558f91a58e4e07b5e32eb436b08f17c99c17f464d7d1abb7c0048c089b86e2",
+   "file": "src/xrpld/app/misc/detail/AmendmentTable.cpp",
+   "lines": "320-380",
+   "blob_sha": "b13e40c3aed1ec8dbd9ec68a464caa5f512f113f",
+   "blob_size": 34890
+  },
+  "E28": {
+   "sha256": "e41ea0c5b90e48f1eba038f1ad113d8e91277d32c1f815ed7e267427ad5c89ba",
+   "file": "src/xrpld/app/misc/detail/AmendmentTable.cpp",
+   "lines": "847-941",
+   "blob_sha": "b13e40c3aed1ec8dbd9ec68a464caa5f512f113f",
+   "blob_size": 34890
+  },
+  "E29": {
+   "sha256": "2f2d8b6dba2ed165abdc4cef001acf104ff7f1275b040fa511ab9cbf72952b89",
+   "file": "include/xrpl/protocol/SystemParameters.h",
+   "lines": "80-88",
+   "blob_sha": "48202928205df69ede2398618420d5585d82b3c4",
+   "blob_size": 3242
+  },
+  "E30": {
+   "sha256": "676d8ab82b66fe410a2d4a5a838d9a472c337625ca0734be8b0db80da5721290",
+   "file": "src/xrpld/app/ledger/Ledger.cpp",
+   "lines": "54-68",
+   "blob_sha": "26552704258627756361a07e0c85a260ed229321",
+   "blob_size": 33022
+  },
+  "E31": {
+   "sha256": "4fc409d8384c9b403e71156e0bfe3e0626fe59295aa68b74d21e4bf741b802e1",
+   "file": "src/xrpld/app/ledger/detail/LedgerMaster.cpp",
+   "lines": "898-945",
+   "blob_sha": "67826c253286c69622334382ac89db711c7a60d2",
+   "blob_size": 70382
+  },
+  "E32": {
+   "sha256": "42621cd77928def636c330781327d3005f6efd5079e4cb2800fa82e136841cd5",
+   "file": "src/xrpld/app/ledger/detail/InboundLedger.cpp",
+   "lines": "44-74",
+   "blob_sha": "47d546c3af380a5baea9dd2536daf9e34a324f3f",
+   "blob_size": 38190
+  },
+  "E33": {
+   "sha256": "d8a0af9b793fd764a5014e3fd33778bf5bee707ccaeb31b9ced5537695946f56",
+   "file": "src/xrpld/app/ledger/detail/InboundLedger.cpp",
+   "lines": "366-413",
+   "blob_sha": "47d546c3af380a5baea9dd2536daf9e34a324f3f",
+   "blob_size": 38190
+  },
+  "E34": {
+   "sha256": "d3aef94f0ded91c50f5f33e2d491f9bf7c66c4c1b93d58218dedbfa3e5400f78",
+   "file": "src/xrpld/app/misc/NetworkOPs.cpp",
+   "lines": "1049-1078",
+   "blob_sha": "57331a855843f0a528289fb3a96f3251926a3aa5",
+   "blob_size": 158487
+  },
+  "E35": {
+   "sha256": "e56acde7ecbc2ee8d69e2bb5b044611acfff772fb3d451424394de89fde1abdf",
+   "file": "src/xrpld/consensus/DisputedTx.h",
+   "lines": "85-148",
+   "blob_sha": "19df205249720c26747d359ec6f9542395c2c038",
+   "blob_size": 11494
+  },
+  "E36": {
+   "sha256": "dae157113258ed1270c4edc6ef6f222febf507bf24e281ddfcfc6ffa9aeb0f67",
+   "file": "src/xrpld/app/misc/detail/ValidatorList.cpp",
+   "lines": "190-220",
+   "blob_sha": "861e2112c1f9355e03b9e42a7565cf6f37cf8c2e",
+   "blob_size": 72746
+  }
+ }
+}

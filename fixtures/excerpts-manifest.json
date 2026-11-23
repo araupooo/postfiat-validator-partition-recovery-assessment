@@ -1,0 +1,263 @@
+{
+ "excerpts": [
+  {
+   "end_line": 114,
+   "file": "src/xrpld/consensus/ConsensusParms.h",
+   "id": "E01",
+   "purpose": "Core consensus constants: minCONSENSUS_PCT=67, ledgerMIN_CLOSE 2s, ledgerMIN/MAX_CONSENSUS, ledgerABANDON_CONSENSUS 120s, ledgerIDLE_INTERVAL 15s \u2014 close timing and abandon rules for the simulator",
+   "start_line": 79
+  },
+  {
+   "end_line": 169,
+   "file": "src/xrpld/consensus/ConsensusParms.h",
+   "id": "E02",
+   "purpose": "Avalanche cutoffs init 50% / mid 65% / late 70% / stuck 95% and avCT_CONSENSUS_PCT=75, avMIN_ROUNDS=2, avSTALLED_ROUNDS=4",
+   "start_line": 146
+  },
+  {
+   "end_line": 201,
+   "file": "src/xrpld/consensus/ConsensusParms.h",
+   "id": "E03",
+   "purpose": "getNeededWeight: avalanche state machine advancing required yes-vote % with round time",
+   "start_line": 175
+  },
+  {
+   "end_line": 103,
+   "file": "src/xrpld/consensus/Consensus.cpp",
+   "id": "E04",
+   "purpose": "shouldCloseLedger: all close triggers (majority-closed, idle, MIN_CLOSE, half-prev-round-time) \u2014 the ledger-close rule",
+   "start_line": 28
+  },
+  {
+   "end_line": 174,
+   "file": "src/xrpld/consensus/Consensus.cpp",
+   "id": "E05",
+   "purpose": "checkConsensusReached: % math, alone-after-MAX_CONSENSUS rule, stalled shortcut",
+   "start_line": 106
+  },
+  {
+   "end_line": 270,
+   "file": "src/xrpld/consensus/Consensus.cpp",
+   "id": "E06",
+   "purpose": "checkConsensus: No / Yes / MovedOn / Expired verdicts, 3/4-proposer wait, abandon clamp",
+   "start_line": 177
+  },
+  {
+   "end_line": 1240,
+   "file": "src/xrpld/consensus/Consensus.h",
+   "id": "E07",
+   "purpose": "phaseOpen: open-phase loop and close decision",
+   "start_line": 1169
+  },
+  {
+   "end_line": 1431,
+   "file": "src/xrpld/consensus/Consensus.h",
+   "id": "E08",
+   "purpose": "phaseEstablish: establish-phase loop, transition to accepted",
+   "start_line": 1367
+  },
+  {
+   "end_line": 1805,
+   "file": "src/xrpld/consensus/Consensus.h",
+   "id": "E09",
+   "purpose": "haveConsensus: agree/disagree counting, stalled detection, Expired bow-out logic",
+   "start_line": 1689
+  },
+  {
+   "end_line": 1685,
+   "file": "src/xrpld/consensus/Consensus.h",
+   "id": "E10",
+   "purpose": "updateOurPositions: close-time avalanche (75% declare threshold) and dispute updates",
+   "start_line": 1493
+  },
+  {
+   "end_line": 1115,
+   "file": "src/xrpld/consensus/Consensus.h",
+   "id": "E11",
+   "purpose": "handleWrongLedger: stop proposing, clear state, replay proposals, acquire preferred ledger or enter wrongLedger mode",
+   "start_line": 1063
+  },
+  {
+   "end_line": 1148,
+   "file": "src/xrpld/consensus/Consensus.h",
+   "id": "E12",
+   "purpose": "checkLedger: per-round preferred-vs-local comparison that triggers wrong-ledger recovery",
+   "start_line": 1119
+  },
+  {
+   "end_line": 53,
+   "file": "src/xrpld/consensus/LedgerTiming.h",
+   "id": "E13",
+   "purpose": "Close-time resolution bins {10,20,30,60,90,120}s, default 30s, increase every 8 / decrease every 1 ledger",
+   "start_line": 35
+  },
+  {
+   "end_line": 128,
+   "file": "src/xrpld/consensus/LedgerTiming.h",
+   "id": "E14",
+   "purpose": "getNextLedgerTimeResolution: coarsen on disagreement, refine on agreement \u2014 partition time-bin drift rule",
+   "start_line": 80
+  },
+  {
+   "end_line": 94,
+   "file": "src/xrpld/consensus/Validations.h",
+   "id": "E15",
+   "purpose": "ValidationParms: CURRENT_WALL 5m, CURRENT_LOCAL 3m, CURRENT_EARLY 3m, SET_EXPIRES 10m, FRESHNESS 20s",
+   "start_line": 47
+  },
+  {
+   "end_line": 166,
+   "file": "src/xrpld/consensus/Validations.h",
+   "id": "E16",
+   "purpose": "isCurrent: three-window validation currency test",
+   "start_line": 149
+  },
+  {
+   "end_line": 707,
+   "file": "src/xrpld/consensus/Validations.h",
+   "id": "E17",
+   "purpose": "Validations::add: stale rejection, SeqEnforcer, conflicting/multiple/badSeq Byzantine detection, trie update on trusted insert",
+   "start_line": 624
+  },
+  {
+   "end_line": 783,
+   "file": "src/xrpld/consensus/Validations.h",
+   "id": "E18",
+   "purpose": "Validations::expire: 10-minute sweep of validation sets, keep-range handling",
+   "start_line": 730
+  },
+  {
+   "end_line": 899,
+   "file": "src/xrpld/consensus/Validations.h",
+   "id": "E19",
+   "purpose": "Validations::getPreferred: preferred working ledger incl. acquiring-ledger fallback \u2014 the fork-choice entry point",
+   "start_line": 850
+  },
+  {
+   "end_line": 960,
+   "file": "src/xrpld/consensus/Validations.h",
+   "id": "E20",
+   "purpose": "Validations::getPreferredLCL: preferred last closed ledger, peer-count fallback",
+   "start_line": 936
+  },
+  {
+   "end_line": 778,
+   "file": "src/xrpld/consensus/LedgerTrie.h",
+   "id": "E21",
+   "purpose": "LedgerTrie::getPreferred: branch-support walk, margin rule, tie-break \u2014 the fork-resolution algorithm",
+   "start_line": 685
+  },
+  {
+   "end_line": 277,
+   "file": "src/xrpld/app/consensus/RCLValidations.cpp",
+   "id": "E22",
+   "purpose": "handleNewValidation: trust marking, add, trusted-current triggers checkAccept, Byzantine logging",
+   "start_line": 166
+  },
+  {
+   "end_line": 932,
+   "file": "src/xrpld/app/consensus/RCLConsensus.cpp",
+   "id": "E23",
+   "purpose": "Adaptor::validate: build/sign/broadcast our validation incl. amendment votes and hardened-validation fields",
+   "start_line": 814
+  },
+  {
+   "end_line": 380,
+   "file": "src/xrpld/app/consensus/RCLConsensus.cpp",
+   "id": "E24",
+   "purpose": "onClose flag-ledger gate: amendment/fee voting only when trusted validations for prev ledger >= quorum()",
+   "start_line": 353
+  },
+  {
+   "end_line": 1935,
+   "file": "src/xrpld/app/misc/detail/ValidatorList.cpp",
+   "id": "E25",
+   "purpose": "calculateQuorum: 67% formula max(ceil(eff*0.67), ceil(unl*0.6)), publisher-outage disable, 80%-vs-67% comment \u2014 the key fork divergence",
+   "start_line": 1845
+  },
+  {
+   "end_line": 2131,
+   "file": "src/xrpld/app/misc/detail/ValidatorList.cpp",
+   "id": "E26",
+   "purpose": "updateTrusted: per-close trusted-set rebuild, list rotation/expiry, quorum recompute, UNL-blocked lockdown",
+   "start_line": 1938
+  },
+  {
+   "end_line": 380,
+   "file": "src/xrpld/app/misc/detail/AmendmentTable.cpp",
+   "id": "E27",
+   "purpose": "AmendmentSet computeThreshold + passes: pre-fix 204/256 >= vs post-fix 67/100 strictly-greater majority test",
+   "start_line": 320
+  },
+  {
+   "end_line": 941,
+   "file": "src/xrpld/app/misc/detail/AmendmentTable.cpp",
+   "id": "E28",
+   "purpose": "AmendmentTableImpl::doVoting: tfGotMajority / tfLostMajority / enablement logic against the 2-week hold",
+   "start_line": 847
+  },
+  {
+   "end_line": 88,
+   "file": "include/xrpl/protocol/SystemParameters.h",
+   "id": "E29",
+   "purpose": "Amendment thresholds: preFix 204/256, postFix 67/100, defaultAmendmentMajorityTime = 2 weeks",
+   "start_line": 80
+  },
+  {
+   "end_line": 68,
+   "file": "src/xrpld/app/ledger/Ledger.cpp",
+   "id": "E30",
+   "purpose": "calculateLedgerHash: sha512Half over seq, drops, parentHash, txHash, accountHash, close times, resolution, close flags",
+   "start_line": 54
+  },
+  {
+   "end_line": 945,
+   "file": "src/xrpld/app/ledger/detail/LedgerMaster.cpp",
+   "id": "E31",
+   "purpose": "checkAccept(hash,seq): trusted-validation count >= quorum() advances mLastValidLedger \u2014 the validation gate",
+   "start_line": 898
+  },
+  {
+   "end_line": 74,
+   "file": "src/xrpld/app/ledger/detail/InboundLedger.cpp",
+   "id": "E32",
+   "purpose": "Inbound-ledger constants: 5 start peers, +3 per timeout, 3s acquire timeout, 6 retries max, aggressive after 4",
+   "start_line": 44
+  },
+  {
+   "end_line": 413,
+   "file": "src/xrpld/app/ledger/detail/InboundLedger.cpp",
+   "id": "E33",
+   "purpose": "InboundLedger::onTimer: timeout handling, peer recruitment, give-up after >6 timeouts (~21s per ledger)",
+   "start_line": 366
+  },
+  {
+   "end_line": 1078,
+   "file": "src/xrpld/app/misc/NetworkOPs.cpp",
+   "id": "E34",
+   "purpose": "processHeartbeatTimer peer-count gate: below minPeerCount_ forces DISCONNECTED and consensus is not ticked",
+   "start_line": 1049
+  },
+  {
+   "end_line": 148,
+   "file": "src/xrpld/consensus/DisputedTx.h",
+   "id": "E35",
+   "purpose": "DisputedTx::stalled: final-avalanche + 2/4-round unchanged + >67%/<33% support test that lets a stalled round accept",
+   "start_line": 85
+  },
+  {
+   "end_line": 220,
+   "file": "src/xrpld/app/misc/detail/ValidatorList.cpp",
+   "id": "E36",
+   "purpose": "ValidatorList::load listThreshold_: config override or publisher majority (size/2+1), truncated for odd counts \u2014 the publisher-threshold rule for S-08",
+   "start_line": 190
+  }
+ ],
+ "pin": {
+  "checkout": "~/workspace/postfiatd-pin-0085a1f",
+  "commit": "0085a1ff885d6a446369cf73a4430f75af22be55",
+  "commit_date": "2026-10-10",
+  "repo": "postfiatorg/postfiatd",
+  "verification": "Every start/end line verified with grep -n plus brace-counting on the pinned checkout; every excerpt source file's blob SHA + size cross-checked against the GitHub API (contents endpoint, ref=commit). All 16 excerpt source files matched (API size == local byte count). Full SHAs in blob-shas.txt."
+ }
+}

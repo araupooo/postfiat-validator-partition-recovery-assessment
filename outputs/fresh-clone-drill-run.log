@@ -1,0 +1,32 @@
+PASS A-S-01 quorum arithmetic + validated flags for S-01 — quorum=[7, 7] per side, validated flags match visible-vs-quorum
+PASS A-S-02 quorum arithmetic + validated flags for S-02 — quorum=[7, 7] per side, validated flags match visible-vs-quorum
+PASS A-S-03 quorum arithmetic + validated flags for S-03 — quorum=[7, 7] per side, validated flags match visible-vs-quorum
+PASS A-S-04 quorum arithmetic + validated flags for S-04 — quorum=[6, 5] per side, validated flags match visible-vs-quorum
+PASS A-S-05 quorum arithmetic + validated flags for S-05 — quorum=[7, 7] per side, validated flags match visible-vs-quorum
+PASS A-S-06 quorum arithmetic + validated flags for S-06 — quorum=[7, 7] per side, validated flags match visible-vs-quorum
+PASS A-S-07 quorum arithmetic + validated flags for S-07 — quorum=[7, 7] per side, validated flags match visible-vs-quorum
+PASS A-S-08 quorum arithmetic + validated flags for S-08 — quorum=[None] per side, validated flags match visible-vs-quorum
+PASS A-S-09 quorum arithmetic + validated flags for S-09 — quorum=[7, 7] per side, validated flags match visible-vs-quorum
+PASS A-S-10 quorum arithmetic + validated flags for S-10 — quorum=[7, 7] per side, validated flags match visible-vs-quorum
+PASS B-01 S-05 majority side: 7 yes > 7*67/100 = 4.69 (strictly greater) — threshold_value=4.69, pseudo_tx=tfGotMajority
+PASS B-02 S-05 minority side: vote skipped, 3 trusted < quorum 7 — trusted=3, yes=1
+PASS B-03 S-09 flag ledger: hold needs ceil(1209600/4) = 302400 ledgers — hold_ledgers_needed=302400
+PASS B-04 post-fix 67/100 (0.67) < pre-fix 204/256 (0.796875) — post-fix 0.67 vs pre-fix 0.796875; docs 80%% matches neither pinned branch
+PASS C-01 hash-chain integrity: every simulated ledger hash recomputes, parent links hold — 1070 ledgers checked
+PASS C-02 reconciled scenarios have one final hash, equal to the rejoin winner tip — 9/10 reconciled (S-03 ends mid-down-window, honestly unreconciled)
+PASS C-03 S-04 dual validation: both sides validated 40; 40 validated ledgers discarded at heal — discarded_validated=40
+PASS D-01 S-09 expiry rounds match the windows: LOCAL 180 s @45, WALL 300 s @75, SET 600 s @150 — local=45 wall=75 set=150
+PASS D-02 S-09 expired sets equal pre-partition sets (3) — sets_expired=3
+PASS E-01 rejoin totals equal event sums; attempts == refetched; 0 timeouts; worst case 21 s/ledger — all 10 scenarios
+PASS E-02 S-10: minority discarded 40 == its closed 40; refetched 40 == majority closed 40 — discarded=40 refetched=40
+PASS E-03 S-07: isolated side discarded 0 (closed nothing) and refetched 30 (whole majority chain) — discarded=0 refetched=30
+PASS F-01 every close-time resolution is in {10,20,30,60,90,120} — all ledgers in all scenarios
+PASS F-02 S-06 minority coarsened to 120 s with sLCF_NoConsensusTime (0x01); majority refined to 10 s, flags 0 — minority final=120 s, majority final=10 s
+PASS G-01 determinism: same-seed re-run is byte-identical (full SHA-256) — shipped=e7efbdf919ee96ac067e399c8909f2389a9171044b08687b5287419110709529 rerun=e7efbdf919ee96ac067e399c8909f2389a9171044b08687b5287419110709529
+PASS G-02 seed sensitivity: seed 1 output differs from seed 0 — seed0=e7efbdf919ee96ac067e399c8909f2389a9171044b08687b5287419110709529 seed1=a80f7536d23759296616642ed18b5667fe68d1de9afe2dccaa43ce56d7d20eda
+PASS H-01 consensus constants: minCONSENSUS_PCT 67, close-time 75, avalanche 50/65/70/95 — min=67 ct=75 avalanche=[50, 65, 70, 95]
+PASS H-02 flag-ledger interval 256: S-05 flag 8283904 %% 256 == 0, S-09 flag 8284160 %% 256 == 0 — interval=256
+PASS T-01 timing sanity: total drill elapsed_ms is non-negative (loose band, never exact) — value not recorded; never compared
+drill: 29/29 checks PASS
+drill: scenario-results.json sha256: e7efbdf919ee96ac067e399c8909f2389a9171044b08687b5287419110709529
+drill: pinned commit 0085a1ff885d6a446369cf73a4430f75af22be55

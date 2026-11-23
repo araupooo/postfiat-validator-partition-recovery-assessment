@@ -1,0 +1,4 @@
+clean_reproduce.sh fresh run
+shipped simulator status: pass
+fresh simulator status: pass
+compare: 45/45 checks PASS

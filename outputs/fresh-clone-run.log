@@ -1,0 +1,10 @@
+# run.log — deterministic output digests (no timestamps, no absolute paths)
+# step extract_excerpts: pass
+# step scenarios: pass
+# step simulator: pass
+# step drills: pass
+d51520fdb0cde5eedc72c685ed86f7c8d42bb1cb9796c634fd0539c0452a3ffe  outputs/derived/drill-results.json
+42d9ccbd5fc122217d545f9acb6b74c9ec491678efc5490c85ecf964878dc7f5  outputs/derived/run-summary.json
+e7efbdf919ee96ac067e399c8909f2389a9171044b08687b5287419110709529  outputs/derived/scenario-results.json
+cf6c048afea970b8ff975112e0903823ef7f3a7920cffb697b9687070fa3a8a8  outputs/drill-run.log
+45b1eb8dacf21854e78b40c18d76ddfdbb972ce1965c462bc7990d8c204da341  outputs/sim-run.log

@@ -1,0 +1,15 @@
+partition_sim: SIMULATED run (seed 0)
+partition_sim: pinned commit 0085a1ff885d6a446369cf73a4430f75af22be55
+partition_sim: S-01 Minority/majority split 7/3 — closed=80 validated=40 validations=400 signals=4 reconciled=True tip=d268a4a8336c373f4318d82246293248c89e25d5fd210062809938543afeabcd
+partition_sim: S-02 Asymmetric reachability (one-way link) — closed=80 validated=40 validations=560 signals=4 reconciled=True tip=671b7e50137bb98ff282630d88e7b771d218fa9f432ed37071ec8e43233ba284
+partition_sim: S-03 Flapping links 5/5 — closed=90 validated=30 validations=600 signals=6 reconciled=False tip=9cc33bb362ce13416ced6e8852393049ad707a2afcff5677a70da37e05e0d82a
+partition_sim: S-04 UNL subset isolation (divergent UNLs, dual validation) — closed=80 validated=80 validations=480 signals=4 reconciled=True tip=cd3cb50751ab853195e4d31b6a4e39f8498fe15f2aa8688d366154799d17031f
+partition_sim: S-05 Amendment-vote split across a flag ledger — closed=120 validated=60 validations=600 signals=6 reconciled=True tip=d6613c8d7ae321763026f855df04cb4944949f05b05ffb0988cdb46bd4ba6d83
+partition_sim: S-06 Ledger-close stall with close-time drift — closed=80 validated=40 validations=400 signals=5 reconciled=True tip=e99a12a2b7518b48ba9cc65a5b94bacbc85fe2908b5d06e5b63323649784d054
+partition_sim: S-07 Single-validator isolation — closed=30 validated=30 validations=270 signals=2 reconciled=True tip=5cc645d3ba570ecf4759cdd9998464703b227fe8edea0265343a7c9014c6f489
+partition_sim: S-08 Publisher outage disables quorum — closed=30 validated=0 validations=300 signals=2 reconciled=True tip=5ff4deb56626e3e94abc0d1e7c62b1cc53baf6f145fa9ca041c38b1e32f2168f
+partition_sim: S-09 Validation-expiry cascade (long partition) — closed=400 validated=200 validations=2000 signals=9 reconciled=True tip=2e244e0558da3a8188046a65922a0a098a88c66eead6851d6f89f4011b0405a8
+partition_sim: S-10 Rejoin hash-reconciliation race — closed=80 validated=40 validations=400 signals=4 reconciled=True tip=650ce694146dc982f565e4f7f810c051793341e722f9412599670076b916bca7
+partition_sim: scenarios=10
+partition_sim: scenario-results.json sha256: e7efbdf919ee96ac067e399c8909f2389a9171044b08687b5287419110709529
+partition_sim: SIMULATED — values model pinned-code rules; not measured postfiatd behaviour.

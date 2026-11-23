@@ -1,0 +1,202 @@
+# Source excerpt E26 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/ValidatorList.cpp, lines 1938-2131.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: a1499c9c0f43be56ea657b2940701a38898117fb0dbdf83cf481de65cad503d4
+# Source file git blob SHA: 861e2112c1f9355e03b9e42a7565cf6f37cf8c2e
+# Source file size: 72746 bytes
+
+# --- src/xrpld/app/misc/detail/ValidatorList.cpp lines 1938-2131 ---
+ValidatorList::updateTrusted(
+    hash_set<NodeID> const& seenValidators,
+    NetClock::time_point closeTime,
+    NetworkOPs& ops,
+    Overlay& overlay,
+    HashRouter& hashRouter)
+{
+    using namespace std::chrono_literals;
+    if (timeKeeper_.now() > closeTime + 30s)
+        closeTime = timeKeeper_.now();
+
+    std::lock_guard lock{mutex_};
+
+    // Rotate pending and remove expired published lists
+    bool good = true;
+    // localPublisherList is not processed here. This is because the
+    // Validators specified in the local config file do not expire nor do
+    // they have a "remaining" section of PublisherList.
+    for (auto& [pubKey, collection] : publisherLists_)
+    {
+        {
+            auto& remaining = collection.remaining;
+            auto const firstIter = remaining.begin();
+            auto iter = firstIter;
+            if (iter != remaining.end() && iter->second.validFrom <= closeTime)
+            {
+                // Find the LAST candidate that is ready to go live.
+                for (auto next = std::next(iter); next != remaining.end() &&
+                     next->second.validFrom <= closeTime;
+                     ++iter, ++next)
+                {
+                    XRPL_ASSERT(
+                        std::next(iter) == next,
+                        "ripple::ValidatorList::updateTrusted : sequential "
+                        "remaining");
+                }
+                XRPL_ASSERT(
+                    iter != remaining.end(),
+                    "ripple::ValidatorList::updateTrusted : non-end of "
+                    "remaining");
+
+                // Rotate the pending list in to current
+                auto sequence = iter->first;
+                auto& candidate = iter->second;
+                auto& current = collection.current;
+                XRPL_ASSERT(
+                    candidate.validFrom <= closeTime,
+                    "ripple::ValidatorList::updateTrusted : maximum time");
+
+                auto const oldList = current.list;
+                current = std::move(candidate);
+                if (collection.status != PublisherStatus::available)
+                    collection.status = PublisherStatus::available;
+                XRPL_ASSERT(
+                    current.sequence == sequence,
+                    "ripple::ValidatorList::updateTrusted : sequence match");
+                // If the list is expired, remove the validators so they don't
+                // get processed in. The expiration check below will do the rest
+                // of the work
+                if (current.validUntil <= closeTime)
+                    current.list.clear();
+
+                updatePublisherList(pubKey, current, oldList, lock);
+
+                // Only broadcast the current, which will consequently only
+                // send to peers that don't understand v2, or which are
+                // unknown (unlikely). Those that do understand v2 should
+                // already have this list and are in the process of
+                // switching themselves.
+                broadcastBlobs(
+                    pubKey,
+                    collection,
+                    sequence,
+                    current.hash,
+                    overlay,
+                    hashRouter,
+                    j_);
+
+                // Erase any candidates that we skipped over, plus this one
+                remaining.erase(firstIter, std::next(iter));
+            }
+        }
+        // Remove if expired
+        // ValidatorLists specified in the local config file never expire.
+        // Hence, the below steps are not relevant for localPublisherList
+        if (collection.status == PublisherStatus::available &&
+            collection.current.validUntil <= closeTime)
+        {
+            removePublisherList(lock, pubKey, PublisherStatus::expired);
+            ops.setUNLBlocked();
+        }
+        if (collection.status != PublisherStatus::available)
+            good = false;
+    }
+    if (good)
+        ops.clearUNLBlocked();
+
+    TrustChanges trustChanges;
+
+    auto it = trustedMasterKeys_.cbegin();
+    while (it != trustedMasterKeys_.cend())
+    {
+        auto const kit = keyListings_.find(*it);
+        if (kit == keyListings_.end() ||     //
+            kit->second < listThreshold_ ||  //
+            validatorManifests_.revoked(*it))
+        {
+            trustChanges.removed.insert(calcNodeID(*it));
+            it = trustedMasterKeys_.erase(it);
+        }
+        else
+        {
+            XRPL_ASSERT(
+                kit->second >= listThreshold_,
+                "ripple::ValidatorList::updateTrusted : count meets threshold");
+            ++it;
+        }
+    }
+
+    for (auto const& val : keyListings_)
+    {
+        if (val.second >= listThreshold_ &&
+            !validatorManifests_.revoked(val.first) &&
+            trustedMasterKeys_.emplace(val.first).second)
+            trustChanges.added.insert(calcNodeID(val.first));
+    }
+
+    // If there were any changes, we need to update the ephemeral signing
+    // keys:
+    if (!trustChanges.added.empty() || !trustChanges.removed.empty())
+    {
+        trustedSigningKeys_.clear();
+
+        // trustedMasterKeys_ contain non-revoked manifests only. Hence the
+        // manifests must contain a valid signingKey
+        for (auto const& k : trustedMasterKeys_)
+        {
+            std::optional<PublicKey> const signingKey =
+                validatorManifests_.getSigningKey(k);
+            XRPL_ASSERT(
+                signingKey,
+                "ripple::ValidatorList::updateTrusted : found signing key");
+            trustedSigningKeys_.insert(*signingKey);
+        }
+    }
+
+    JLOG(j_.debug())
+        << trustedMasterKeys_.size() << "  of " << keyListings_.size()
+        << " listed validators eligible for inclusion in the trusted set";
+
+    auto const unlSize = trustedMasterKeys_.size();
+    auto effectiveUnlSize = unlSize;
+    auto seenSize = seenValidators.size();
+    if (!negativeUNL_.empty())
+    {
+        for (auto const& k : trustedMasterKeys_)
+        {
+            if (negativeUNL_.count(k))
+                --effectiveUnlSize;
+        }
+        hash_set<NodeID> negUnlNodeIDs;
+        for (auto const& k : negativeUNL_)
+        {
+            negUnlNodeIDs.emplace(calcNodeID(k));
+        }
+        for (auto const& nid : seenValidators)
+        {
+            if (negUnlNodeIDs.count(nid))
+                --seenSize;
+        }
+    }
+    quorum_ = calculateQuorum(unlSize, effectiveUnlSize, seenSize);
+
+    JLOG(j_.debug()) << "Using quorum of " << quorum_ << " for new set of "
+                     << unlSize << " trusted validators ("
+                     << trustChanges.added.size() << " added, "
+                     << trustChanges.removed.size() << " removed)";
+
+    if (unlSize < quorum_)
+    {
+        JLOG(j_.warn()) << "New quorum of " << quorum_
+                        << " exceeds the number of trusted validators ("
+                        << unlSize << ")";
+    }
+
+    if ((publisherLists_.size() || localPublisherList.list.size()) &&
+        unlSize == 0)
+    {
+        // No validators. Lock down.
+        ops.setUNLBlocked();
+    }
+
+    return trustChanges;
+}

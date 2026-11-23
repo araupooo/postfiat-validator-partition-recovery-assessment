@@ -1,0 +1,127 @@
+# Source excerpt E23 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/consensus/RCLConsensus.cpp, lines 814-932.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 72716393a820832d7fd6f6084f4ac9534fdc7ccf09c10f5aa8d2f129828a0cee
+# Source file git blob SHA: 457555cc1c83cb617a6838e0099fc93e1d715b49
+# Source file size: 37567 bytes
+
+# --- src/xrpld/app/consensus/RCLConsensus.cpp lines 814-932 ---
+RCLConsensus::Adaptor::validate(
+    RCLCxLedger const& ledger,
+    RCLTxSet const& txns,
+    bool proposing)
+{
+    using namespace std::chrono_literals;
+
+    auto validationTime = app_.timeKeeper().closeTime();
+    if (validationTime <= lastValidationTime_)
+        validationTime = lastValidationTime_ + 1s;
+    lastValidationTime_ = validationTime;
+
+    if (!validatorKeys_.keys)
+    {
+        JLOG(j_.warn()) << "RCLConsensus::Adaptor::validate: ValidatorKeys "
+                           "not set\n";
+        return;
+    }
+
+    auto const& keys = *validatorKeys_.keys;
+
+    auto v = std::make_shared<STValidation>(
+        lastValidationTime_,
+        keys.publicKey,
+        keys.secretKey,
+        validatorKeys_.nodeID,
+        [&](STValidation& v) {
+            v.setFieldH256(sfLedgerHash, ledger.id());
+            v.setFieldH256(sfConsensusHash, txns.id());
+
+            v.setFieldU32(sfLedgerSequence, ledger.seq());
+
+            if (proposing)
+                v.setFlag(vfFullValidation);
+
+            if (ledger.ledger_->rules().enabled(featureHardenedValidations))
+            {
+                // Attest to the hash of what we consider to be the last fully
+                // validated ledger. This may be the hash of the ledger we are
+                // validating here, and that's fine.
+                if (auto const vl = ledgerMaster_.getValidatedLedger())
+                    v.setFieldH256(sfValidatedHash, vl->info().hash);
+
+                v.setFieldU64(sfCookie, valCookie_);
+
+                // Report our server version every flag ledger:
+                if (ledger.ledger_->isVotingLedger())
+                    v.setFieldU64(
+                        sfServerVersion, BuildInfo::getEncodedVersion());
+            }
+
+            // Report our load
+            {
+                auto const& ft = app_.getFeeTrack();
+                auto const fee = std::max(ft.getLocalFee(), ft.getClusterFee());
+                if (fee > ft.getLoadBase())
+                    v.setFieldU32(sfLoadFee, fee);
+            }
+
+            // PF_AccountExclusion: Include any exclusion list changes in validation
+            if (ledger.ledger_->rules().enabled(featurePF_AccountExclusion))
+            {
+                // Check if validator has pending exclusion changes
+                if (auto const changes = app_.getValidatorExclusionManager()
+                        .getExclusionChange(ledger.seq()))
+                {
+                    auto const& [exclusionAdd, exclusionRemove] = *changes;
+
+                    if (exclusionAdd)
+                    {
+                        v.setAccountID(sfExclusionAdd, *exclusionAdd);
+                        JLOG(j_.info()) << "Adding exclusion to validation: "
+                                       << toBase58(*exclusionAdd);
+                    }
+
+                    if (exclusionRemove)
+                    {
+                        v.setAccountID(sfExclusionRemove, *exclusionRemove);
+                        JLOG(j_.info()) << "Adding exclusion removal to validation: "
+                                       << toBase58(*exclusionRemove);
+                    }
+                }
+            }
+
+            // If the next ledger is a flag ledger, suggest fee changes and
+            // new features:
+            if (ledger.ledger_->isVotingLedger())
+            {
+                // Fees:
+                feeVote_->doValidation(
+                    ledger.ledger_->fees(), ledger.ledger_->rules(), v);
+
+                // Amendments
+                // FIXME: pass `v` and have the function insert the array
+                // directly?
+                auto const amendments = app_.getAmendmentTable().doValidation(
+                    getEnabledAmendments(*ledger.ledger_));
+
+                if (!amendments.empty())
+                    v.setFieldV256(
+                        sfAmendments, STVector256(sfAmendments, amendments));
+            }
+        });
+
+    auto const serialized = v->getSerialized();
+
+    // suppress it if we receive it
+    app_.getHashRouter().addSuppression(sha512Half(makeSlice(serialized)));
+
+    handleNewValidation(app_, v, "local");
+
+    // Broadcast to all our peers:
+    protocol::TMValidation val;
+    val.set_validation(serialized.data(), serialized.size());
+    app_.overlay().broadcast(val);
+
+    // Publish to all our subscribers:
+    app_.getOPs().pubValidation(v);
+}

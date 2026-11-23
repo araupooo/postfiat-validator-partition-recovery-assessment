@@ -1,0 +1,120 @@
+# Source excerpt E22 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/consensus/RCLValidations.cpp, lines 166-277.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: cf96cc049a4050d61926c57af4e5021845ee0e0553ff25daf66354f800ccbd32
+# Source file git blob SHA: 669d69957da77a68bb5ace92a5e0ff789572be85
+# Source file size: 9726 bytes
+
+# --- src/xrpld/app/consensus/RCLValidations.cpp lines 166-277 ---
+handleNewValidation(
+    Application& app,
+    std::shared_ptr<STValidation> const& val,
+    std::string const& source,
+    BypassAccept const bypassAccept,
+    std::optional<beast::Journal> j)
+{
+    auto const& signingKey = val->getSignerPublic();
+    auto const& hash = val->getLedgerHash();
+    auto const seq = val->getFieldU32(sfLedgerSequence);
+
+    // Ensure validation is marked as trusted if signer currently trusted
+    auto masterKey = app.validators().getTrustedKey(signingKey);
+
+    if (!val->isTrusted() && masterKey)
+        val->setTrusted();
+
+    // If not currently trusted, see if signer is currently listed
+    if (!masterKey)
+        masterKey = app.validators().getListedKey(signingKey);
+
+    auto& validations = app.getValidations();
+
+    // masterKey is seated only if validator is trusted or listed
+    auto const outcome =
+        validations.add(calcNodeID(masterKey.value_or(signingKey)), val);
+
+    if (outcome == ValStatus::current)
+    {
+        if (val->isTrusted())
+        {
+            // Record the vote for PF_ValidatorVoteTracking amendment
+            // Use the validation's signing hash as proof of the vote
+
+            // Check for exclusion list changes in the validation
+            std::optional<AccountID> exclusionAdd;
+            std::optional<AccountID> exclusionRemove;
+
+            if (val->isFieldPresent(sfExclusionAdd))
+                exclusionAdd = val->getAccountID(sfExclusionAdd);
+            if (val->isFieldPresent(sfExclusionRemove))
+                exclusionRemove = val->getAccountID(sfExclusionRemove);
+
+            auto const keyForVote = masterKey.value_or(signingKey);
+            JLOG(app.journal("Validations").info())
+                << "RCLValidations: Recording vote with "
+                << (masterKey ? "master key: " : "signing key: ")
+                << toBase58(TokenType::NodePublic, keyForVote)
+                << " -> Account: " << toBase58(calcAccountID(keyForVote));
+
+            app.getValidatorVoteTracker().recordVote(
+                keyForVote,  // Use master key if available, otherwise signing key
+                hash,
+                seq,
+                val->getSigningHash(),  // Validation signing hash as proof
+                app.timeKeeper().closeTime(),
+                exclusionAdd,
+                exclusionRemove);
+            
+            if (bypassAccept == BypassAccept::yes)
+            {
+                XRPL_ASSERT(
+                    j, "ripple::handleNewValidation : journal is available");
+                if (j.has_value())
+                {
+                    JLOG(j->trace()) << "Bypassing checkAccept for validation "
+                                     << val->getLedgerHash();
+                }
+            }
+            else
+            {
+                app.getLedgerMaster().checkAccept(hash, seq);
+            }
+        }
+        return;
+    }
+
+    // Ensure that problematic validations from validators we trust are
+    // logged at the highest possible level.
+    //
+    // One might think that we should more than just log: we ought to also
+    // not relay validations that fail these checks. Alas, and somewhat
+    // counterintuitively, we *especially* want to forward such validations,
+    // so that our peers will also observe them and take independent notice of
+    // such validators, informing their operators.
+    if (auto const ls = val->isTrusted()
+            ? validations.adaptor().journal().error()
+            : validations.adaptor().journal().info();
+        ls.active())
+    {
+        auto const id = [&masterKey, &signingKey]() {
+            auto ret = toBase58(TokenType::NodePublic, signingKey);
+
+            if (masterKey && masterKey != signingKey)
+                ret += ":" + toBase58(TokenType::NodePublic, *masterKey);
+
+            return ret;
+        }();
+
+        if (outcome == ValStatus::conflicting)
+            ls << "Byzantine Behavior Detector: "
+               << (val->isTrusted() ? "trusted " : "untrusted ") << id
+               << ": Conflicting validation for " << seq << "!\n["
+               << val->getSerializer().slice() << "]";
+
+        if (outcome == ValStatus::multiple)
+            ls << "Byzantine Behavior Detector: "
+               << (val->isTrusted() ? "trusted " : "untrusted ") << id
+               << ": Multiple validations for " << seq << "/" << hash << "!\n["
+               << val->getSerializer().slice() << "]";
+    }
+}

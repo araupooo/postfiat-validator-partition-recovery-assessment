@@ -1,0 +1,99 @@
+# Source excerpt E25 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/ValidatorList.cpp, lines 1845-1935.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: a1499c9c0f43be56ea657b2940701a38898117fb0dbdf83cf481de65cad503d4
+# Source file git blob SHA: 861e2112c1f9355e03b9e42a7565cf6f37cf8c2e
+# Source file size: 72746 bytes
+
+# --- src/xrpld/app/misc/detail/ValidatorList.cpp lines 1845-1935 ---
+ValidatorList::calculateQuorum(
+    std::size_t unlSize,
+    std::size_t effectiveUnlSize,
+    std::size_t seenSize)
+{
+    // Use quorum if specified via command line.
+    if (minimumQuorum_ > 0)
+    {
+        JLOG(j_.warn()) << "Using potentially unsafe quorum of "
+                        << *minimumQuorum_
+                        << " as specified on the command line";
+        return *minimumQuorum_;
+    }
+
+    if (!publisherLists_.empty())
+    {
+        // Do not use achievable quorum until lists from a sufficient number of
+        // configured publishers are available
+        std::size_t unavailable = 0;
+        for (auto const& list : publisherLists_)
+        {
+            if (list.second.status != PublisherStatus::available)
+                unavailable += 1;
+        }
+        // There are two, subtly different, sides to list threshold:
+        //
+        // 1. The minimum required intersection between lists listThreshold_
+        //    for a validator to be included in trustedMasterKeys_.
+        //    If this many (or more) publishers are unavailable, we are likely
+        //    to NOT include a validator which otherwise would have been used.
+        //    We disable quorum if this happens.
+        // 2. The minimum number of publishers which, when unavailable, will
+        //    prevent us from hitting the above threshold on ANY validator.
+        //    This is calculated as:
+        //      N - M + 1
+        //    where
+        //      N: number of publishers i.e. publisherLists_.size()
+        //      M: minimum required intersection i.e. listThreshold_
+        //    If this happens, we still have this local validator and we do not
+        //    want it to form a quorum of 1, so we disable quorum as well.
+        //
+        // We disable quorum if the number of unavailable publishers exceeds
+        // either of the above thresholds
+        auto const errorThreshold = std::min(
+            listThreshold_,  //
+            publisherLists_.size() - listThreshold_ + 1);
+        XRPL_ASSERT(
+            errorThreshold > 0,
+            "ripple::ValidatorList::calculateQuorum : nonzero error threshold");
+        if (unavailable >= errorThreshold)
+            return std::numeric_limits<std::size_t>::max();
+    }
+
+    // Use a 67% quorum to balance fork safety, liveness, and required UNL
+    // overlap. Note: Original XRPL uses 80%, but this fork uses 67% for
+    // devnet/testnet. For mainnet, this should be reverted to 80%.
+    //
+    // Theorem 8 of the Analysis of the XRP Ledger Consensus Protocol
+    // (https://arxiv.org/abs/1802.07242) says:
+    //     XRP LCP guarantees fork safety if Oi,j > nj/2 + ni − qi + ti,j
+    //     for every pair of nodes Pi, Pj.
+    //
+    // ni: size of Pi's UNL
+    // nj: size of Pj's UNL
+    // Oi,j: number of validators in both UNLs
+    // qi: validation quorum for Pi's UNL
+    // ti, tj: maximum number of allowed Byzantine faults in Pi and Pj's
+    // UNLs ti,j: min{ti, tj, Oi,j}
+    //
+    // Assume ni < nj, meaning and ti,j = ti
+    //
+    // For qi = .67*ni, we make ti <= .33*ni
+    // (We could make ti lower and tolerate less UNL overlap. However in
+    // order to prioritize safety over liveness, we need ti >= ni - qi)
+    //
+    // A 67% quorum allows two UNLs to safely have < .33*ni unique
+    // validators between them:
+    //
+    // pi = ni - Oi,j
+    // pj = nj - Oi,j
+    //
+    // Oi,j > nj/2 + ni − qi + ti,j
+    // ni - pi > (ni - pi + pj)/2 + ni − .67*ni + .33*ni
+    // pi + pj < .33*ni
+    //
+    // Note that the negative UNL protocol introduced the
+    // AbsoluteMinimumQuorum which is 60% of the original UNL size. The
+    // effective quorum should not be lower than it.
+    return static_cast<std::size_t>(std::max(
+        std::ceil(effectiveUnlSize * 0.67f), std::ceil(unlSize * 0.6f)));
+}
